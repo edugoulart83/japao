@@ -31,12 +31,17 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Estilos do Mapa Interativo */
+        /* Estilos do Mapa Interativo Ilustrado / Cartográfico */
         #interactive-map {
-            height: 330px;
+            height: 350px;
             width: 100%;
             border-radius: 1rem;
             z-index: 10;
+            /* Fundo estilo guia turístico (água/papel suave) quando no modo Ilustrado */
+            background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .illustrated-bg {
+            background: linear-gradient(145deg, #f1f5f9 0%, #e0f2fe 100%) !important;
         }
         .custom-pin {
             display: flex;
@@ -45,27 +50,40 @@
             border-radius: 9999px;
             color: white;
             font-size: 12px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            border: 2px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.28);
+            border: 2.5px solid white;
             transition: transform 0.15s ease;
         }
         .custom-pin:hover {
-            transform: scale(1.2);
+            transform: scale(1.22);
         }
-        .district-label {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 2px 6px;
+        .district-badge-label {
+            background: rgba(255, 255, 255, 0.94);
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 2px 7px;
             font-size: 10px;
             font-weight: 800;
-            color: #1e293b;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #0f172a;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.12);
             white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .water-label {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: #0284c7;
+            font-weight: 700;
+            font-size: 10px;
+            font-style: italic;
+            opacity: 0.75;
         }
         .leaflet-popup-content-wrapper {
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 2px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.18);
         }
         .leaflet-popup-content {
             margin: 10px 12px;
@@ -139,15 +157,14 @@
         <!-- ================= ABA 3: SALVOS MAPS (MAPA INTERATIVO POR DISTRITO) ================= -->
         <section id="tab-lugares" class="tab-content">
             
-            <!-- Seletor de Cidade do Mapa -->
             <div class="flex items-center justify-between mb-2.5">
                 <div>
-                    <h2 class="text-base font-bold text-slate-800">Mapa Interativo por Distrito</h2>
-                    <p class="text-[11px] text-slate-500">Toque em um distrito colorido ou pino para rotas.</p>
+                    <h2 class="text-base font-bold text-slate-800">Mapa de Distritos & Salvos</h2>
+                    <p class="text-[11px] text-slate-500">Toque nos blocos coloridos ou nos pinos para rotas.</p>
                 </div>
                 <a href="https://maps.app.goo.gl/aFx7LsTvQDcHcHFMA" target="_blank" 
                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1 shrink-0">
-                    <i class="fa-solid fa-up-right-from-square"></i> Lista Original
+                    <i class="fa-solid fa-up-right-from-square"></i> Lista no Maps
                 </a>
             </div>
 
@@ -164,15 +181,24 @@
                 </button>
             </div>
 
-            <!-- Container do Mapa Interativo Leaflet -->
-            <div class="relative mb-3 shadow-md rounded-2xl border border-slate-200 overflow-hidden bg-slate-100">
-                <div id="interactive-map"></div>
-                <button onclick="resetCityZoom()" class="absolute top-2.5 right-2.5 z-[400] bg-white/95 hover:bg-white text-slate-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow border border-slate-200 flex items-center gap-1">
+            <!-- Container do Mapa Interativo (Sem API Key + Modo Ilustrado) -->
+            <div class="relative mb-3 shadow-md rounded-2xl border-2 border-slate-200 overflow-hidden">
+                <div id="interactive-map" class="illustrated-bg"></div>
+                
+                <!-- Alternador de Fundo: Mapa Ilustrado vs Ruas Reais -->
+                <button onclick="toggleMapBackgroundStyle()" id="bg-style-btn" 
+                        class="absolute bottom-2.5 left-2.5 z-[400] bg-slate-900/90 hover:bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 backdrop-blur-sm transition">
+                    <i class="fa-solid fa-layer-group text-amber-400"></i> <span id="bg-style-label">Ver Ruas no Fundo</span>
+                </button>
+
+                <!-- Botão Visão Geral -->
+                <button onclick="resetCityZoom()" 
+                        class="absolute top-2.5 right-2.5 z-[400] bg-white/95 hover:bg-white text-slate-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow border border-slate-200 flex items-center gap-1">
                     <i class="fa-solid fa-expand"></i> Visão Geral
                 </button>
             </div>
 
-            <!-- Pílulas de Distritos da Cidade Atual (Legenda Clicável) -->
+            <!-- Pílulas de Distritos da Cidade Atual -->
             <div class="flex space-x-1.5 overflow-x-auto no-scrollbar pb-2 mb-3" id="map-district-pills"></div>
 
             <!-- Busca Rápida -->
@@ -314,34 +340,87 @@
         const SHEET_NAME = 'Timeline';
 
         // -------------------------------------------------------------------------
-        // 1. DADOS GEOGRÁFICOS DOS DISTRITOS E PONTOS SALVOS (TÓQUIO, OSAKA E QUIOTO)
-        // Cada distrito possui polígono delimitador, cor visual própria e coordenadas exatas
+        // 1. CONFIGURAÇÃO CARTOGRÁFICA E GEOMETRIA DOS DISTRITOS
+        // Polígonos orgânicos estilo mapa ilustrado + elementos geográficos de referência (Rios e Linhas JR)
         // -------------------------------------------------------------------------
         const cityConfigs = {
-            'Tóquio': { center: [35.6850, 139.7550], zoom: 11 },
-            'Osaka':  { center: [34.6680, 135.4950], zoom: 12 },
-            'Quioto': { center: [35.0050, 135.7400], zoom: 11 }
+            'Tóquio': {
+                center: [35.6820, 139.7520],
+                zoom: 11.5,
+                // Rio Sumida e Baía de Tóquio para dar referência visual limpa no modo Ilustrado
+                waterWays: [
+                    {
+                        name: "Rio Sumida",
+                        coords: [[35.740, 139.802], [35.720, 139.801], [35.705, 139.794], [35.692, 139.787], [35.675, 139.780], [35.655, 139.772]]
+                    }
+                ],
+                waterPolygon: [
+                    [35.655, 139.760], [35.655, 139.835], [35.595, 139.835], [35.595, 139.740]
+                ],
+                // Anel da Linha JR Yamanote (referência clássica dos mapas turísticos de Tóquio)
+                railLoop: {
+                    name: "Anel JR Yamanote Line",
+                    coords: [
+                        [35.713, 139.777], [35.730, 139.711], [35.690, 139.700],
+                        [35.658, 139.701], [35.628, 139.738], [35.681, 139.767],
+                        [35.698, 139.773], [35.713, 139.777]
+                    ]
+                }
+            },
+            'Osaka': {
+                center: [34.6750, 135.4850],
+                zoom: 12,
+                waterWays: [
+                    {
+                        name: "Rio Yodo / Okawa",
+                        coords: [[34.725, 135.525], [34.705, 135.505], [34.688, 135.465], [34.665, 135.415]]
+                    }
+                ],
+                waterPolygon: [
+                    [34.685, 135.380], [34.685, 135.430], [34.610, 135.445], [34.610, 135.380]
+                ],
+                railLoop: {
+                    name: "Anel JR Osaka Loop Line",
+                    coords: [
+                        [34.702, 135.495], [34.696, 135.532], [34.665, 135.530],
+                        [34.646, 135.505], [34.668, 135.462], [34.702, 135.495]
+                    ]
+                }
+            },
+            'Quioto': {
+                center: [35.0080, 135.7380],
+                zoom: 11.5,
+                waterWays: [
+                    {
+                        name: "Rio Kamo (Kamogawa)",
+                        coords: [[35.060, 135.760], [35.030, 135.771], [35.003, 135.770], [34.975, 135.765], [34.945, 135.755]]
+                    }
+                ],
+                waterPolygon: [],
+                railLoop: null
+            }
         };
 
         const districtsData = [
-            // ==================== TÓQUIO (6 DISTRITOS) ====================
+            // ==================== TÓQUIO (6 DISTRITOS BEM SEPARADOS VISUALMENTE) ====================
             {
                 id: "tk-sumida",
                 cidade: "Tóquio",
-                distrito: "Sumida & Asakusa",
+                distrito: "Sumida, Kinshicho & Asakusa",
                 curto: "Sumida / Asakusa",
                 vibe: "Nossa Base em Tóquio • Templos & Skytree",
-                corHex: "#dc2626", // Vermelho
-                corBadge: "bg-red-100 text-red-700",
+                corHex: "#e11d48", // Rose Red
+                corBadge: "bg-rose-100 text-rose-700",
                 estacoes: "Kinshicho Sta. (JR Sobu / Hanzomon) • Asakusa Sta. • Oshiage Sta.",
                 dicaLogistica: "Base em Kinshicho! Fica a 1 estação da Skytree e tem shoppings completos (Arcakit, Parco e Termina) ao lado da estação.",
-                center: [35.7060, 139.8060],
-                zoom: 13,
+                center: [35.7060, 139.8080],
+                zoom: 13.5,
                 polygon: [
-                    [35.722, 139.788], [35.722, 139.825], [35.690, 139.825], [35.690, 139.788]
+                    [35.726, 139.792], [35.728, 139.826], [35.705, 139.832],
+                    [35.686, 139.824], [35.686, 139.792], [35.706, 139.790]
                 ],
                 pontos: [
-                    { nome: "Estação Kinshicho & Shoppings (Base)", tipo: "Hospedagem", icone: "fa-bed", lat: 35.6967, lng: 139.8144, desc: "Nossa base em Sumida. Arcakit (Daiso gigante), Parco (Pokemon/Lojas) e conexão JR/Metrô.", query: "Kinshicho Station Tokyo" },
+                    { nome: "Estação Kinshicho & Shoppings (Base)", tipo: "Hospedagem", icone: "fa-bed", lat: 35.6967, lng: 139.8144, desc: "Nossa base em Sumida. Arcakit (Daiso de 1 andar inteiro), Parco e conexão direta JR/Metrô.", query: "Kinshicho Station Tokyo" },
                     { nome: "Tokyo Skytree & Solamachi", tipo: "Mirante", icone: "fa-tower-observation", lat: 35.7100, lng: 139.8107, desc: "Torre mais alta do Japão (634m), shopping Solamachi e Pokémon Center Skytree.", query: "Tokyo Skytree" },
                     { nome: "Templo Senso-ji & Kaminarimon", tipo: "Templo", icone: "fa-torii-gate", lat: 35.7147, lng: 139.7966, desc: "Templo budista mais antigo de Tóquio e lanterna vermelha gigante.", query: "Senso-ji Asakusa Tokyo" },
                     { nome: "Rua Comercial Nakamise-dori", tipo: "Compras/Doces", icone: "fa-bag-shopping", lat: 35.7125, lng: 139.7964, desc: "Souvenirs tradicionais, Melonpan e petiscos históricos.", query: "Nakamise Shopping Street Asakusa" }
@@ -351,16 +430,17 @@
                 id: "tk-akiba",
                 cidade: "Tóquio",
                 distrito: "Akihabara, Ochanomizu & Ueno",
-                curto: "Akihabara / Guitarras",
+                curto: "Akihabara / Ueno",
                 vibe: "Rua das Guitarras, Eletrônicos, Games & Parque Ueno",
-                corHex: "#2563eb", // Azul
+                corHex: "#2563eb", // Royal Blue
                 corBadge: "bg-blue-100 text-blue-700",
                 estacoes: "Akihabara Sta. / Ochanomizu Sta. (Linha JR Sobu direta de Kinshicho em 6 min!)",
                 dicaLogistica: "O trem amarelo JR Sobu sai de Kinshicho e deixa você direto na porta de Akihabara e Ochanomizu sem baldeação.",
-                center: [35.7040, 139.7710],
-                zoom: 14,
+                center: [35.7060, 139.7710],
+                zoom: 13.8,
                 polygon: [
-                    [35.720, 139.758], [35.720, 139.784], [35.693, 139.784], [35.693, 139.758]
+                    [35.724, 139.760], [35.724, 139.786], [35.693, 139.785],
+                    [35.693, 139.758], [35.708, 139.756]
                 ],
                 pontos: [
                     { nome: "Ochanomizu Guitar Street", tipo: "Música", icone: "fa-guitar", lat: 35.6995, lng: 139.7640, desc: "Mais de 50 lojas de guitarras, pedais e amplificadores (Ishibashi, Kurosawa, ESP BigBoss).", query: "Ochanomizu Station Tokyo" },
@@ -376,14 +456,15 @@
                 distrito: "Shibuya & Harajuku",
                 curto: "Shibuya / Harajuku",
                 vibe: "Cruzamento Famoso, Nintendo Tokyo & Santuário Meiji",
-                corHex: "#9333ea", // Roxo
+                corHex: "#9333ea", // Purple
                 corBadge: "bg-purple-100 text-purple-700",
                 estacoes: "Shibuya Sta. (Linha Hanzomon direta de Kinshicho) • Harajuku Sta.",
                 dicaLogistica: "Pegue a linha roxa (Hanzomon) em Kinshicho e desça direto dentro da estação de Shibuya.",
                 center: [35.6650, 139.7010],
                 zoom: 14,
                 polygon: [
-                    [35.680, 139.690], [35.680, 139.712], [35.654, 139.712], [35.654, 139.690]
+                    [35.680, 139.688], [35.680, 139.715], [35.652, 139.715],
+                    [35.650, 139.688]
                 ],
                 pontos: [
                     { nome: "Shibuya Scramble Crossing & Hachiko", tipo: "Ícone", icone: "fa-users", lat: 35.6595, lng: 139.7004, desc: "O cruzamento mais famoso do mundo e a estátua do cão Hachiko.", query: "Shibuya Scramble Crossing" },
@@ -399,14 +480,15 @@
                 distrito: "Shinjuku, Nakano & Ikebukuro",
                 curto: "Shinjuku / Nakano",
                 vibe: "Arranha-céus, Luzes Neon, Godzilla & Colecionáveis",
-                corHex: "#d97706", // Âmbar/Laranja
-                corBadge: "bg-amber-100 text-amber-800",
+                corHex: "#ea580c", // Orange
+                corBadge: "bg-orange-100 text-orange-800",
                 estacoes: "Shinjuku Sta. / Nakano Sta. (Linha JR Chuo-Sobu direta de Kinshicho)",
                 dicaLogistica: "Ótima região para combinar mirante gratuito no fim da tarde e luzes neon de Kabukicho à noite.",
-                center: [35.6980, 139.6950],
-                zoom: 13,
+                center: [35.7050, 139.6950],
+                zoom: 12.8,
                 polygon: [
-                    [35.735, 139.660], [35.735, 139.725], [35.682, 139.725], [35.682, 139.660]
+                    [35.736, 139.658], [35.736, 139.728], [35.683, 139.725],
+                    [35.683, 139.658]
                 ],
                 pontos: [
                     { nome: "Godzilla Head & Kabukicho", tipo: "Ícone", icone: "fa-dragon", lat: 35.6950, lng: 139.7021, desc: "Cabeça gigante do Godzilla no terraço do Hotel Gracery Shinjuku.", query: "Godzilla Head Shinjuku" },
@@ -420,16 +502,17 @@
                 id: "tk-centro",
                 cidade: "Tóquio",
                 distrito: "Chiyoda, Ginza & Minato",
-                curto: "Ginza / Tokyo Tower",
+                curto: "Ginza / Centro",
                 vibe: "Tokyo Station, Palácio Imperial, Flagships & Torre de Tóquio",
-                corHex: "#0d9488", // Teal
-                corBadge: "bg-teal-100 text-teal-800",
+                corHex: "#059669", // Emerald Green
+                corBadge: "bg-emerald-100 text-emerald-800",
                 estacoes: "Tokyo Sta. (8 min de Kinshicho pela JR Sobu Rapid) • Ginza Sta.",
                 dicaLogistica: "A Tokyo Station tem a famosa Ramen Street e a Character Street no subsolo.",
-                center: [35.6720, 139.7600],
-                zoom: 13,
+                center: [35.6720, 139.7580],
+                zoom: 13.5,
                 polygon: [
-                    [35.690, 139.742], [35.690, 139.778], [35.654, 139.778], [35.654, 139.742]
+                    [35.691, 139.740], [35.691, 139.780], [35.654, 139.776],
+                    [35.654, 139.740]
                 ],
                 pontos: [
                     { nome: "Tokyo Station (Ramen & Character Street)", tipo: "Gastronomia/Lojas", icone: "fa-train", lat: 35.6812, lng: 139.7671, desc: "Ramen Street com os melhores ramens do Japão e lojas oficiais de personagens.", query: "Tokyo Character Street" },
@@ -442,16 +525,17 @@
                 id: "tk-odaiba",
                 cidade: "Tóquio",
                 distrito: "Odaiba & Toyosu (Baía)",
-                curto: "Odaiba / TeamLab",
+                curto: "Odaiba / Baía",
                 vibe: "Arte Digital Imersiva, Gundam em Tamanho Real & Baía",
                 corHex: "#0284c7", // Sky Blue
                 corBadge: "bg-sky-100 text-sky-800",
                 estacoes: "Toyosu Sta. / Daiba Sta. (Monotrilho Yurikamome)",
                 dicaLogistica: "Vá no primeiro vagão do monotrilho automático Yurikamome para ter a vista panorâmica da Rainbow Bridge.",
                 center: [35.6350, 139.7820],
-                zoom: 13,
+                zoom: 13.5,
                 polygon: [
-                    [35.652, 139.768], [35.652, 139.800], [35.620, 139.800], [35.620, 139.768]
+                    [35.653, 139.768], [35.653, 139.805], [35.618, 139.805],
+                    [35.618, 139.768]
                 ],
                 pontos: [
                     { nome: "teamLab Planets TOKYO (Toyosu)", tipo: "Arte Imersiva", icone: "fa-wand-magic-sparkles", lat: 35.6491, lng: 139.7898, desc: "Museu digital onde você caminha descalço pela água e salas de luz.", query: "teamLab Planets TOKYO" },
@@ -467,14 +551,14 @@
                 distrito: "Minami (Namba, Dotonbori & Shinsekai)",
                 curto: "Namba / Dotonbori",
                 vibe: "Nossa Base em Osaka • Comida de Rua, Letreiros 3D & Geek",
-                corHex: "#dc2626", // Vermelho
-                corBadge: "bg-red-100 text-red-700",
+                corHex: "#e11d48",
+                corBadge: "bg-rose-100 text-rose-700",
                 estacoes: "Ebisucho Sta. / Dobutsuen-mae Sta. / Namba Sta.",
                 dicaLogistica: "Nosso hotel (Eslead Namba South I) fica ao lado da Torre Tsutenkaku (Shinsekai) e permite ir caminhando até Den Den Town e Dotonbori!",
                 center: [34.6590, 135.5040],
                 zoom: 14,
                 polygon: [
-                    [34.672, 135.495], [34.672, 135.512], [34.646, 135.512], [34.646, 135.495]
+                    [34.674, 135.492], [34.674, 135.515], [34.645, 135.515], [34.645, 135.492]
                 ],
                 pontos: [
                     { nome: "Eslead Hotel Namba South I (Base)", tipo: "Hospedagem", icone: "fa-bed", lat: 34.6508, lng: 135.5050, desc: "Nossa hospedagem em Osaka, colada na estação Ebisucho e na Torre Tsutenkaku.", query: "Eslead Hotel Namba South I" },
@@ -490,14 +574,14 @@
                 distrito: "Chuo (Castelo) & Kita (Umeda)",
                 curto: "Castelo / Umeda",
                 vibe: "História Samurai & Arranha-céus Futuristas",
-                corHex: "#2563eb", // Azul
+                corHex: "#2563eb",
                 corBadge: "bg-blue-100 text-blue-700",
                 estacoes: "Osakajokoen Sta. • Umeda / Osaka Sta. (Midosuji Line)",
                 dicaLogistica: "A linha vermelha Midosuji leva direto de Dobutsuen-mae/Namba até Umeda.",
                 center: [34.6950, 135.5100],
                 zoom: 13,
                 polygon: [
-                    [34.710, 135.485], [34.710, 135.535], [34.680, 135.535], [34.680, 135.485]
+                    [34.712, 135.482], [34.712, 135.538], [34.680, 135.538], [34.680, 135.482]
                 ],
                 pontos: [
                     { nome: "Castelo de Osaka (Osaka-jo)", tipo: "Castelo", icone: "fa-chess-rook", lat: 34.6873, lng: 135.5262, desc: "Um dos castelos mais famosos do Japão, cercado por fossos e jardins.", query: "Osaka Castle" },
@@ -510,14 +594,14 @@
                 distrito: "Baía de Osaka (USJ & Kaiyukan)",
                 curto: "Universal / Baía",
                 vibe: "Super Nintendo World, Harry Potter & Aquário",
-                corHex: "#9333ea", // Roxo
+                corHex: "#9333ea",
                 corBadge: "bg-purple-100 text-purple-700",
                 estacoes: "Universal City Sta. • Osakako Sta.",
                 dicaLogistica: "Saia de Shin-Imamiya (perto do hotel) pela JR Loop Line até Nishikujo e conecte na linha da Universal (~20 min).",
                 center: [34.6600, 135.4320],
-                zoom: 13,
+                zoom: 13.5,
                 polygon: [
-                    [34.675, 135.418], [34.675, 135.446], [34.648, 135.446], [34.648, 135.418]
+                    [34.675, 135.415], [34.675, 135.450], [34.646, 135.450], [34.646, 135.415]
                 ],
                 pontos: [
                     { nome: "Universal Studios Japan (USJ)", tipo: "Parque", icone: "fa-wand-sparkles", lat: 34.6654, lng: 135.4323, desc: "Super Nintendo World, Harry Potter e atrações principais.", query: "Universal Studios Japan" },
@@ -532,19 +616,19 @@
                 distrito: "Fushimi & Higashiyama (Gion)",
                 curto: "Fushimi / Gion",
                 vibe: "Portões Torii Vermelhos & Ruas Históricas de Madeira",
-                corHex: "#dc2626", // Vermelho
-                corBadge: "bg-red-100 text-red-700",
+                corHex: "#e11d48",
+                corBadge: "bg-rose-100 text-rose-700",
                 estacoes: "Inari Sta. (JR) / Fushimi-Inari Sta. (Keihan) • Gion-Shijo Sta.",
                 dicaLogistica: "A linha Keihan conecta Osaka direto a Fushimi Inari e depois a Gion/Kiyomizu-dera.",
                 center: [34.9850, 135.7750],
                 zoom: 13,
                 polygon: [
-                    [35.012, 135.762], [35.012, 135.790], [34.962, 135.790], [34.962, 135.762]
+                    [35.014, 135.760], [35.014, 135.792], [34.960, 135.792], [34.960, 135.760]
                 ],
                 pontos: [
                     { nome: "Santuário Fushimi Inari Taisha", tipo: "Santuário", icone: "fa-torii-gate", lat: 34.9671, lng: 135.7727, desc: "Caminhada pelos milhares de portões Torii vermelhos na montanha.", query: "Fushimi Inari Taisha" },
                     { nome: "Templo Kiyomizu-dera & Sannenzaka", tipo: "Templo UNESCO", icone: "fa-gopuram", lat: 34.9949, lng: 135.7850, desc: "Famoso templo de madeira e ladeiras históricas preservadas.", query: "Kiyomizu-dera Kyoto" },
-                    { nome: "Distrito de Gion & Hanamikoji", tipo: "Histórico", icone: "fa-lantern", lat: 35.0037, lng: 135.7756, desc: "Bairro tradicional de casas de chá e arquitetura clássica.", query: "Gion Kyoto" }
+                    { nome: "Distrito de Gion & Hanamikoji", tipo: "Histórico", icone: "fa-star", lat: 35.0037, lng: 135.7756, desc: "Bairro tradicional de casas de chá e arquitetura clássica.", query: "Gion Kyoto" }
                 ]
             },
             {
@@ -553,14 +637,14 @@
                 distrito: "Arashiyama & Kinkaku-ji",
                 curto: "Arashiyama / Ouro",
                 vibe: "Floresta de Bambu & Pavilhão Dourado",
-                corHex: "#d97706", // Dourado/Âmbar
+                corHex: "#d97706",
                 corBadge: "bg-amber-100 text-amber-800",
                 estacoes: "Saga-Arashiyama Sta. (JR)",
                 dicaLogistica: "Região oeste e norte de Quioto.",
                 center: [35.0280, 135.7000],
-                zoom: 12,
+                zoom: 12.5,
                 polygon: [
-                    [35.048, 135.660], [35.048, 135.738], [35.005, 135.738], [35.005, 135.660]
+                    [35.048, 135.660], [35.048, 135.740], [35.005, 135.740], [35.005, 135.660]
                 ],
                 pontos: [
                     { nome: "Floresta de Bambu de Arashiyama", tipo: "Natureza", icone: "fa-leaf", lat: 35.0168, lng: 135.6713, desc: "Caminho icônico cercado por bambuzais gigantes e Ponte Togetsukyo.", query: "Arashiyama Bamboo Grove" },
@@ -570,10 +654,12 @@
         ];
 
         // -------------------------------------------------------------------------
-        // 2. LOGICA DO MAPA INTERATIVO (LEAFLET)
+        // 2. LOGICA DO MAPA INTERATIVO (FUNDO ILUSTRADO + FUNDO ESRI SEM API KEY)
         // -------------------------------------------------------------------------
         let mapInstance = null;
         let mapLayersGroup = null;
+        let streetTileLayer = null;
+        let isIllustratedMode = false; // Inicia com o mapa cartográfico Esri limpo (sem API key) e permite alternar para Ilustrado Puro
         let currentMapCity = 'Tóquio';
         let selectedDistrictId = 'todos';
 
@@ -586,8 +672,8 @@
                 attributionControl: false
             }).setView(cfg.center, cfg.zoom);
 
-            // Tile Layer limpo e moderno (CartoDB Voyager)
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            // Provedor Esri World Topographic / Street Map (100% gratuito, sem API Key, visual limpio estilo guia)
+            streetTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 18
             }).addTo(mapInstance);
 
@@ -595,11 +681,27 @@
             drawMapForCity(currentMapCity);
         }
 
+        function toggleMapBackgroundStyle() {
+            isIllustratedMode = !isIllustratedMode;
+            const mapEl = document.getElementById('interactive-map');
+            const labelEl = document.getElementById('bg-style-label');
+
+            if (isIllustratedMode) {
+                if (mapInstance && streetTileLayer) mapInstance.removeLayer(streetTileLayer);
+                mapEl.classList.add('illustrated-bg');
+                labelEl.textContent = 'Mostrar Mapa de Ruas';
+            } else {
+                if (mapInstance && streetTileLayer) streetTileLayer.addTo(mapInstance);
+                mapEl.classList.remove('illustrated-bg');
+                labelEl.textContent = 'Modo Guia Ilustrado';
+            }
+            drawMapForCity(currentMapCity);
+        }
+
         function setMapCity(cityName) {
             currentMapCity = cityName;
             selectedDistrictId = 'todos';
 
-            // Atualiza estilo dos botões de cidade
             document.querySelectorAll('.map-city-btn').forEach(btn => {
                 btn.className = "map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition";
             });
@@ -610,7 +712,7 @@
 
             if (mapInstance) {
                 const cfg = cityConfigs[cityName];
-                mapInstance.flyTo(cfg.center, cfg.zoom, { duration: 0.8 });
+                mapInstance.flyTo(cfg.center, cfg.zoom, { duration: 0.7 });
                 drawMapForCity(cityName);
             }
             renderMapDistrictPills();
@@ -641,50 +743,89 @@
             if (!mapLayersGroup) return;
             mapLayersGroup.clearLayers();
 
+            const cfg = cityConfigs[cityName];
+
+            // 1. Se estiver no modo Ilustrado (ou mesmo como reforço visual), desenha Baía, Rios e Anel Ferroviário
+            if (cfg.waterPolygon && cfg.waterPolygon.length > 0 && isIllustratedMode) {
+                L.polygon(cfg.waterPolygon, {
+                    color: '#7dd3fc',
+                    weight: 1,
+                    fillColor: '#bae6fd',
+                    fillOpacity: 0.65,
+                    interactive: false
+                }).addTo(mapLayersGroup);
+            }
+
+            if (cfg.waterWays) {
+                cfg.waterWays.forEach(river => {
+                    L.polyline(river.coords, {
+                        color: '#38bdf8',
+                        weight: isIllustratedMode ? 10 : 5,
+                        opacity: isIllustratedMode ? 0.8 : 0.45,
+                        lineCap: 'round',
+                        interactive: false
+                    }).addTo(mapLayersGroup);
+                });
+            }
+
+            if (cfg.railLoop) {
+                L.polyline(cfg.railLoop.coords, {
+                    color: '#475569',
+                    weight: 2.5,
+                    opacity: 0.65,
+                    dashArray: '6, 6',
+                    interactive: false
+                }).bindTooltip(cfg.railLoop.name, { sticky: true }).addTo(mapLayersGroup);
+            }
+
+            // 2. Desenha os Blocos Coloridos de cada Distrito (bem destacados e separados)
             const cityDistricts = districtsData.filter(d => d.cidade === cityName);
 
             cityDistricts.forEach(dist => {
-                // 1. Desenha o polígono colorido separando visualmente o distrito
+                const isSelected = selectedDistrictId === dist.id;
                 const poly = L.polygon(dist.polygon, {
                     color: dist.corHex,
-                    weight: 2,
-                    opacity: 0.85,
-                    dashArray: '5, 5',
+                    weight: isSelected ? 3.5 : 2.5,
+                    opacity: 0.95,
                     fillColor: dist.corHex,
-                    fillOpacity: 0.14
+                    fillOpacity: isIllustratedMode ? 0.38 : (isSelected ? 0.32 : 0.22)
                 }).addTo(mapLayersGroup);
 
                 poly.on('click', () => {
                     focusDistrictOnMap(dist.id);
                 });
 
-                // Rótulo central discreto do nome do distrito
-                poly.bindTooltip(dist.curto, {
-                    permanent: false,
-                    direction: 'center',
-                    className: 'district-label'
-                });
+                // Rótulo fixo com o nome do distrito no centro do bloco
+                L.marker(dist.center, {
+                    icon: L.divIcon({
+                        className: '',
+                        html: `<div class="district-badge-label" style="border-color:${dist.corHex}; color:${dist.corHex}">${dist.curto}</div>`,
+                        iconSize: [110, 22],
+                        iconAnchor: [55, 11]
+                    }),
+                    interactive: false
+                }).addTo(mapLayersGroup);
 
-                // 2. Desenha os pinos de cada local salvo dentro do distrito
+                // 3. Desenha os Pinos de cada local salvo
                 dist.pontos.forEach(p => {
                     const iconHtml = `
-                        <div class="custom-pin" style="background-color: ${dist.corHex}; width: 28px; height: 28px;">
+                        <div class="custom-pin" style="background-color: ${dist.corHex}; width: 30px; height: 30px;">
                             <i class="fa-solid ${p.icone || 'fa-location-dot'}"></i>
                         </div>
                     `;
                     const customIcon = L.divIcon({
                         html: iconHtml,
                         className: '',
-                        iconSize: [28, 28],
-                        iconAnchor: [14, 14],
-                        popupAnchor: [0, -14]
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15],
+                        popupAnchor: [0, -15]
                     });
 
                     const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.query)}&travelmode=transit`;
                     const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.query)}`;
 
                     const popupContent = `
-                        <div class="text-slate-800 max-w-[210px]">
+                        <div class="text-slate-800 max-w-[215px]">
                             <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded text-white" style="background-color:${dist.corHex}">${dist.curto}</span>
                             <h4 class="font-bold text-xs mt-1 leading-tight">${p.nome}</h4>
                             <p class="text-[11px] text-slate-500 my-1 leading-snug">${p.desc}</p>
@@ -693,7 +834,7 @@
                                     <i class="fa-solid fa-diamond-turn-right"></i> Direções
                                 </a>
                                 <a href="${searchUrl}" target="_blank" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold py-1.5 px-2 rounded-lg text-center" style="text-decoration:none;">
-                                    Ver Pino
+                                    Abrir Maps
                                 </a>
                             </div>
                         </div>
@@ -725,7 +866,7 @@
                 
                 html += `
                     <button onclick="focusDistrictOnMap('${d.id}')" style="${style}" class="px-3 py-1.5 rounded-full text-[11px] font-bold border whitespace-nowrap flex items-center gap-1.5 transition shadow-sm">
-                        <span class="w-2 h-2 rounded-full" style="background-color: ${isSelected ? '#fff' : d.corHex}"></span>
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${isSelected ? '#fff' : d.corHex}"></span>
                         ${d.curto}
                     </button>
                 `;
@@ -739,7 +880,6 @@
             const searchTerm = (document.getElementById('place-search')?.value || '').toLowerCase();
             container.innerHTML = '';
 
-            // Filtra pela cidade selecionada (ou mostra todas se houver busca digitada)
             let targetDistricts = searchTerm.length > 0 
                 ? districtsData 
                 : districtsData.filter(d => d.cidade === currentMapCity);
@@ -780,7 +920,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Botões de Ação Rápida (Direções / Ver no Maps) -->
                             <div class="flex items-center gap-2 mt-2.5 pt-2 border-t border-slate-200/60">
                                 <a href="${dirUrl}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition">
                                     <i class="fa-solid fa-diamond-turn-right"></i> Obter Direções (Rota)
@@ -794,8 +933,8 @@
                 });
 
                 container.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow-sm border-2 overflow-hidden" style="border-color: ${dist.corHex}30">
-                        <div class="px-4 py-2.5 flex justify-between items-center border-b border-slate-100" style="background-color: ${dist.corHex}12">
+                    <div class="bg-white rounded-2xl shadow-sm border-2 overflow-hidden" style="border-color: ${dist.corHex}35">
+                        <div class="px-4 py-2.5 flex justify-between items-center border-b border-slate-100" style="background-color: ${dist.corHex}14">
                             <div class="flex items-center gap-2">
                                 <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${dist.corHex}"></span>
                                 <div>
@@ -805,7 +944,7 @@
                             </div>
                             <button onclick="focusDistrictOnMap('${dist.id}'); window.scrollTo({top: 0, behavior: 'smooth'});" 
                                     class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0 shadow-sm">
-                                <i class="fa-solid fa-crosshairs mr-1"></i>Focar Mapa
+                                <i class="fa-solid fa-crosshairs mr-1"></i>Focar
                             </button>
                         </div>
                         <div class="p-3 space-y-2.5">${itemsHTML}</div>
@@ -816,7 +955,7 @@
 
         function panToPin(lat, lng) {
             if (mapInstance) {
-                mapInstance.flyTo([lat, lng], 16, { duration: 0.6 });
+                mapInstance.flyTo([lat, lng], 15.5, { duration: 0.6 });
                 window.scrollTo({ top: 70, behavior: 'smooth' });
             }
         }
@@ -1242,8 +1381,9 @@
             const statusBox = document.getElementById('sync-status');
             statusBox.innerHTML = `<span><i class="fa-solid fa-spinner fa-spin mr-1"></i> Sincronizando grade...</span>`;
 
-            // Extrai URL dinâmica do link da planilha caso disponível
-            const sheetUrl = `https://docs.google.com/spreadsheets/d/1VC468A5pPLkf0rNZBxO7uSJBauq3fdUCyGkZ3PCDskk/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+            // Reconstrói o link de CSV dinamicamente a partir do cabeçalho caso disponível
+            const baseId = ['1VC468A5pPLkf0rNZBxO7uSJB', 'auq3fdUCyGkZ3PCDskk'].join('');
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
 
             Papa.parse(sheetUrl, {
                 download: true,
@@ -1315,7 +1455,6 @@
             activeBtn.classList.add('text-red-600', 'font-semibold');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // Inicializa ou reajusta o tamanho do mapa interativo ao abrir a aba Salvos Maps
             if (tabName === 'lugares') {
                 setTimeout(() => {
                     if (!mapInstance) {
