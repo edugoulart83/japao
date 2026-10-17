@@ -16,7 +16,6 @@
             background-color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
         }
-        /* Esconder barra de rolagem mantendo funcionalidade */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -69,36 +68,58 @@
             </div>
 
             <!-- Lista da Timeline -->
-            <div id="timeline-container" class="space-y-4">
-                <!-- Preenchido via JavaScript -->
-            </div>
+            <div id="timeline-container" class="space-y-4"></div>
 
         </section>
 
-        <!-- ================= ABA 2: LUGARES SALVOS (MAPS) ================= -->
+        <!-- ================= ABA 2: DISTRITOS / REGIÕES (NOVA) ================= -->
+        <section id="tab-distritos" class="tab-content">
+            
+            <div class="mb-3">
+                <h2 class="text-base font-bold text-slate-800">Explorar por Distrito / Região</h2>
+                <p class="text-xs text-slate-500">Agrupamento inteligente para otimizar os deslocamentos de metrô e caminhada em cada bairro.</p>
+            </div>
+
+            <!-- Filtro de Cidade para Distritos -->
+            <div class="flex space-x-2 overflow-x-auto no-scrollbar pb-3 mb-2" id="district-filters">
+                <button onclick="filterDistricts('todos')" class="dist-btn bg-red-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">Todas as Regiões</button>
+                <button onclick="filterDistricts('Tóquio')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🗼 Tóquio (5)</button>
+                <button onclick="filterDistricts('Osaka')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🏯 Osaka (3)</button>
+                <button onclick="filterDistricts('Quioto')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">⛩️ Quioto (2)</button>
+            </div>
+
+            <!-- Lista de Distritos -->
+            <div id="districts-container" class="space-y-4"></div>
+
+        </section>
+
+        <!-- ================= ABA 3: LUGARES SALVOS (MAPS) ================= -->
         <section id="tab-lugares" class="tab-content">
             
             <!-- Card de Acesso Rápido à Lista Oficial -->
             <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-5 text-white shadow-lg mb-5 relative overflow-hidden">
                 <i class="fa-solid fa-map-location-dot text-7xl absolute -right-3 -bottom-3 text-white/10"></i>
-                <span class="bg-white/20 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded">Google Maps</span>
+                <span class="bg-white/20 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded">Google Maps Oficial</span>
                 <h2 class="text-xl font-bold mt-2">Lista de Lugares Salvos</h2>
-                <p class="text-xs text-emerald-100 mt-1 mb-4">Acesse todos os pins, restaurantes e atrações mapeados para a viagem diretamente no app do Google Maps.</p>
+                <p class="text-xs text-emerald-100 mt-1 mb-4">Acesse todos os pins, restaurantes e atrações salvos na nossa lista compartilhada diretamente no app do Google Maps.</p>
                 <a href="https://maps.app.goo.gl/aFx7LsTvQDcHcHFMA" target="_blank" 
                    class="inline-flex items-center justify-center w-full bg-white text-emerald-800 font-bold text-sm py-2.5 px-4 rounded-xl shadow hover:bg-emerald-50 transition">
                     <i class="fa-solid fa-location-arrow mr-2"></i> Abrir Lista Completa no Maps
                 </a>
             </div>
 
-            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Acesso Rápido por Região & Interesse</h3>
-
-            <div class="space-y-3" id="places-container">
-                <!-- Preenchido via JS -->
+            <!-- Busca Rápida de Lugar -->
+            <div class="relative mb-4">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                <input type="text" id="place-search" oninput="renderPlaces()" placeholder="Filtrar ponto salvo (ex: Guitar, Nintendo, Ramen)..." 
+                       class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 shadow-sm">
             </div>
+
+            <div class="space-y-3" id="places-container"></div>
 
         </section>
 
-        <!-- ================= ABA 3: TRANSPORTE & PREÇOS ================= -->
+        <!-- ================= ABA 4: TRANSPORTE & PREÇOS ================= -->
         <section id="tab-transporte" class="tab-content">
             
             <div class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-r-xl mb-5 text-xs text-amber-900">
@@ -125,7 +146,6 @@
 
             <!-- Cards de Transporte -->
             <div class="space-y-4">
-                
                 <!-- 1. Trens Urbanos & IC Cards -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="bg-slate-800 text-white px-4 py-2.5 flex justify-between items-center">
@@ -136,7 +156,7 @@
                         <div class="flex justify-between items-start border-b border-slate-100 pb-2">
                             <div>
                                 <p class="font-bold text-slate-800 text-sm">IC Card (Suica / Pasmo / Icoca)</p>
-                                <p class="text-slate-500">Cartão pré-pago recarregável (tipo Bilhete Único). Aceito em trens, ônibus e konbinis.</p>
+                                <p class="text-slate-500">Cartão pré-pago recarregável. Aceito em metrôs, trens da JR, ônibus e lojas de conveniência.</p>
                             </div>
                             <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded whitespace-nowrap">¥180 ~ ¥400 / trecho</span>
                         </div>
@@ -152,7 +172,7 @@
                             </div>
                         </div>
                         <p class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded">
-                            <strong>Nota p/ Crianças (6 a 11 anos):</strong> Pagam exatamente <strong>50% da tarifa</strong> (Child IC Card ou bilhetes infantis). Menores de 6 anos viajam grátis.
+                            <strong>Nota p/ Crianças (6 a 11 anos):</strong> Pagam exatamente <strong>50% da tarifa</strong> (Child IC Card ou bilhetes infantis).
                         </p>
                     </div>
                 </div>
@@ -174,18 +194,8 @@
                                 <span class="text-[10px] text-slate-400">Assento Reservado</span>
                             </div>
                         </div>
-                        <div class="flex justify-between items-start border-b border-slate-100 pb-2">
-                            <div>
-                                <p class="font-bold text-slate-800 text-sm">JR Pass Nacional (7 Dias)</p>
-                                <p class="text-slate-500">Só compensa se incluir Hiroshima, Kanazawa e bate-voltas longos na mesma semana.</p>
-                            </div>
-                            <div class="text-right whitespace-nowrap ml-2">
-                                <span class="block font-bold text-red-600 text-sm">¥50.000</span>
-                                <span class="text-[10px] text-slate-400">Não recomendado</span>
-                            </div>
-                        </div>
                         <p class="text-[11px] text-amber-800 bg-amber-50 p-2 rounded">
-                            <strong><i class="fa-solid fa-suitcase mr-1"></i> Regra de Bagagem:</strong> Malas grandes (soma das dimensões entre 160cm e 250cm) exigem reserva do <em>"Seat with Oversized Baggage Area"</em> sem custo extra se reservado antecipadamente.
+                            <strong><i class="fa-solid fa-suitcase mr-1"></i> Regra de Bagagem:</strong> Malas grandes (soma das dimensões entre 160cm e 250cm) exigem reserva do <em>"Seat with Oversized Baggage Area"</em>.
                         </p>
                     </div>
                 </div>
@@ -200,49 +210,45 @@
                         <div class="flex justify-between items-start border-b border-slate-100 pb-2">
                             <div>
                                 <p class="font-bold text-slate-800 text-sm">Aeroporto de Narita (NRT) ➔ Tóquio</p>
-                                <p class="text-slate-500"><strong>Narita Express (N'EX):</strong> Direto para Tokyo, Shinagawa, Shibuya e Shinjuku (~60 min).<br><strong>Keisei Skyliner:</strong> Rápido para Ueno/Nippori (~41 min).</p>
+                                <p class="text-slate-500"><strong>Narita Express (N'EX):</strong> Direto p/ Tokyo, Shibuya e Shinjuku (~60 min).<br><strong>Keisei Skyliner:</strong> Rápido p/ Ueno (~41 min).</p>
                             </div>
                             <div class="text-right whitespace-nowrap ml-2">
                                 <span class="block font-bold text-slate-800">N'EX: ¥3.070</span>
                                 <span class="block font-bold text-slate-800">Skyliner: ¥2.570</span>
                             </div>
                         </div>
-                        <div class="flex justify-between items-start border-b border-slate-100 pb-2">
-                            <div>
-                                <p class="font-bold text-slate-800 text-sm">Aeroporto de Haneda (HND) ➔ Tóquio</p>
-                                <p class="text-slate-500">Tokyo Monorail ou Linha Keikyu (20 a 30 min até o centro).</p>
-                            </div>
-                            <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded whitespace-nowrap">¥330 ~ ¥500</span>
-                        </div>
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="font-bold text-slate-800 text-sm">Takkyubin (Yamato Transport)</p>
-                                <p class="text-slate-500">Despacho de malas grandes do hotel de Tóquio direto para o hotel de Osaka. Viaje no trem-bala apenas com mochila!</p>
+                                <p class="text-slate-500">Despacho de malas grandes do hotel de Tóquio direto para o hotel de Osaka.</p>
                             </div>
                             <span class="font-bold text-purple-700 bg-purple-50 px-2 py-1 rounded whitespace-nowrap ml-2">¥2.500 ~ ¥3.200 / mala</span>
                         </div>
                     </div>
                 </div>
-
             </div>
         </section>
 
     </main>
 
-    <!-- Barra de Navegação Inferior (Bottom Nav) -->
+    <!-- Barra de Navegação Inferior (4 Abas) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-50">
         <div class="max-w-md mx-auto flex justify-around">
             <button onclick="switchTab('timeline')" id="nav-timeline" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-red-600 font-semibold transition">
-                <i class="fa-solid fa-calendar-day text-lg mb-0.5"></i>
-                <span class="text-[11px]">Timeline</span>
+                <i class="fa-solid fa-calendar-day text-base mb-0.5"></i>
+                <span class="text-[10px]">Timeline</span>
+            </button>
+            <button onclick="switchTab('distritos')" id="nav-distritos" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-Signs-post fa-map text-base mb-0.5"></i>
+                <span class="text-[10px]">Distritos</span>
             </button>
             <button onclick="switchTab('lugares')" id="nav-lugares" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
-                <i class="fa-solid fa-map-pin text-lg mb-0.5"></i>
-                <span class="text-[11px]">Lugares Salvos</span>
+                <i class="fa-solid fa-location-dot text-base mb-0.5"></i>
+                <span class="text-[10px]">Salvos Maps</span>
             </button>
             <button onclick="switchTab('transporte')" id="nav-transporte" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
-                <i class="fa-solid fa-train text-lg mb-0.5"></i>
-                <span class="text-[11px]">Transportes</span>
+                <i class="fa-solid fa-train text-base mb-0.5"></i>
+                <span class="text-[10px]">Transporte</span>
             </button>
         </div>
     </nav>
@@ -254,78 +260,203 @@
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
 
         // -------------------------------------------------------------------------
-        // DADOS LOCAIS DA TIMELINE (Fallback Offline / Editável)
-        // Caso a planilha esteja privada, o app usa esta base estruturada.
+        // 1. DADOS DOS DISTRITOS / REGIÕES (Foco em Orientação Geográfica)
+        // -------------------------------------------------------------------------
+        const districtsData = [
+            {
+                cidade: "Tóquio",
+                distrito: "Akihabara & Ochanomizu",
+                vibe: "Eletrônicos, Cultura Geek & Rua das Guitarras",
+                corBadge: "bg-red-100 text-red-700",
+                estacoes: "Akihabara Sta. (JR Yamanote / Hibiya) • Ochanomizu Sta. (JR Chuo)",
+                dicaLogistica: "Ficam a apenas 1 estação de distância (ou 10 min de caminhada cruzando a ponte sobre o rio Kanda). Ideal fazer no mesmo turno!",
+                pontos: [
+                    { nome: "Ochanomizu Guitar Street", tipo: "Música", desc: "Mais de 50 lojas de guitarras, baixos, pedais e amplificadores (Ishibashi, Kurosawa, ESP BigBoss).", query: "Ochanomizu Guitar Street Tokyo" },
+                    { nome: "Yodobashi Camera Multimedia Akiba", tipo: "Eletrônicos", desc: "Megastore de 9 andares com tudo de tecnologia, áudio, câmeras e colecionáveis.", query: "Yodobashi Akiba" },
+                    { nome: "Super Potato & Mandarake", tipo: "Games/Anime", desc: "Lojas lendárias de retro-games, action figures e itens raros.", query: "Super Potato Akihabara" },
+                    { nome: "Radio Kaikan", tipo: "Cultura Pop", desc: "Prédio icônico de 10 andares repleto de lojas de figures, cartas e hobbies.", query: "Akihabara Radio Kaikan" }
+                ]
+            },
+            {
+                cidade: "Tóquio",
+                distrito: "Shibuya & Harajuku",
+                vibe: "Juventude, Compras, Nintendo & Santuários",
+                corBadge: "bg-red-100 text-red-700",
+                estacoes: "Shibuya Sta. / Harajuku Sta. (JR Yamanote / Ginza Line)",
+                dicaLogistica: "Comece cedo no Santuário Meiji Jingu (Harajuku) e desça caminhando pela Takeshita-dori e Omotesando até chegar em Shibuya no fim da tarde.",
+                pontos: [
+                    { nome: "Shibuya Scramble Crossing & Hachiko", tipo: "Ícone", desc: "O cruzamento mais movimentado do mundo e a estátua fiel do cão Hachiko.", query: "Shibuya Scramble Crossing" },
+                    { nome: "Shibuya PARCO (6º Andar - Cyberspace)", tipo: "Games", desc: "Andar inteiro com Nintendo Tokyo, Pokémon Center, Capcom Store e Jump Shop.", query: "Shibuya PARCO" },
+                    { nome: "Shibuya Sky", tipo: "Mirante", desc: "Observatório 360º a céu aberto no topo do Shibuya Scramble Square (reservar antes).", query: "Shibuya Sky" },
+                    { nome: "Santuário Meiji Jingu", tipo: "Tradição", desc: "Santuário xintoísta monumental cercado por uma floresta tranquila.", query: "Meiji Jingu Tokyo" },
+                    { nome: "Takeshita Street (Harajuku)", tipo: "Cultura Jovem", desc: "Rua vibrante famosa por crepes, lojas temáticas e moda japonesa.", query: "Takeshita Street Harajuku" }
+                ]
+            },
+            {
+                cidade: "Tóquio",
+                distrito: "Shinjuku",
+                vibe: "Arranha-céus, Luzes Neon & Gastronomia Noturna",
+                corBadge: "bg-red-100 text-red-700",
+                estacoes: "Shinjuku Sta. (JR Yamanote / Marunouchi / Oedo)",
+                dicaLogistica: "Excelente região para o final de tarde e noite. A vista do Prédio do Governo Metropolitano é gratuita.",
+                pontos: [
+                    { nome: "Godzilla Head (Kabukicho)", tipo: "Ícone", desc: "Cabeça gigante do Godzilla no terraço do Hotel Gracery Shinjuku.", query: "Godzilla Head Shinjuku" },
+                    { nome: "Omoide Yokocho", tipo: "Gastronomia", desc: "Beco histórico estreito cheio de pequenas barracas de yakitori (espetinhos) e ramen.", query: "Omoide Yokocho Shinjuku" },
+                    { nome: "Tokyo Metropolitan Government Building", tipo: "Mirante Gratuito", desc: "Observatório gratuito no 45º andar e show de projeção mapeada à noite.", query: "Tokyo Metropolitan Government Building" },
+                    { nome: "Cross Shinjuku Vision (Gato 3D)", tipo: "Curiosidade", desc: "Painel curvo gigante com o famoso gato em 3D na saída leste da estação.", query: "Cross Shinjuku Vision" }
+                ]
+            },
+            {
+                cidade: "Tóquio",
+                distrito: "Asakusa & Ueno",
+                vibe: "Tóquio Histórica, Templos & Mercados de Rua",
+                corBadge: "bg-red-100 text-red-700",
+                estacoes: "Asakusa Sta. / Ueno Sta. (Ginza Line - conectadas em 5 min)",
+                dicaLogistica: "Asakusa e Ueno são ligadas diretamente pela linha Ginza (laranja) do metrô. Ótimo para a manhã.",
+                pontos: [
+                    { nome: "Templo Senso-ji & Portão Kaminarimon", tipo: "Templo", desc: "O templo mais antigo de Tóquio com a famosa lanterna vermelha gigante.", query: "Senso-ji Asakusa" },
+                    { nome: "Nakamise-dori", tipo: "Compras/Doces", desc: "Rua comercial histórica em frente ao templo para souvenirs e doces tradicionais (Melonpan).", query: "Nakamise Shopping Street" },
+                    { nome: "Tokyo Skytree", tipo: "Mirante/Shopping", desc: "Torre mais alta do Japão (634m) com grande shopping (Solamachi) na base.", query: "Tokyo Skytree" },
+                    { nome: "Parque Ueno & Ameyoko Market", tipo: "Parque/Mercado", desc: "Museus importantes e mercado de rua movimentado sob os trilhos do trem.", query: "Ameyoko Shopping District" }
+                ]
+            },
+            {
+                cidade: "Tóquio",
+                distrito: "Odaiba & Toyosu (Baía de Tóquio)",
+                vibe: "Futurismo, Arte Imersiva & Gundam Gigante",
+                corBadge: "bg-red-100 text-red-700",
+                estacoes: "Toyosu Sta. / Daiba Sta. (Monotrilho Yurikamome)",
+                dicaLogistica: "Pegue o monotrilho automatizado Yurikamome em Shimbashi e sente na primeira janela para cruzar a Rainbow Bridge.",
+                pontos: [
+                    { nome: "teamLab Planets TOKYO (Toyosu)", tipo: "Arte Digital", desc: "Museu imersivo onde você caminha descalço pela água e luzes interativas.", query: "teamLab Planets TOKYO" },
+                    { nome: "Unicorn Gundam (DiverCity Plaza)", tipo: "Cultura Pop", desc: "Estátua em tamanho real (19,7m) com shows de transformação e loja Gundam Base.", query: "Unicorn Gundam Statue Odaiba" },
+                    { nome: "Estátua da Liberdade & Baía de Odaiba", tipo: "Vista", desc: "Calçadão com réplica da Estátua da Liberdade e vista espetacular da Rainbow Bridge.", query: "Odaiba Statue of Liberty" }
+                ]
+            },
+            {
+                cidade: "Osaka",
+                distrito: "Minami (Dotonbori, Namba & Nipponbashi)",
+                vibe: "Capital da Comida de Rua, Letreiros 3D & Geek",
+                corBadge: "bg-blue-100 text-blue-700",
+                estacoes: "Namba Sta. / Shinsaibashi Sta. (Midosuji Line)",
+                dicaLogistica: "Tudo aqui pode ser feito a pé! Dotonbori, Shinsaibashi, Kuromon Market e Den Den Town são colados uns nos outros.",
+                pontos: [
+                    { nome: "Dotonbori & Letreiro Glico Man", tipo: "Ícone/Comida", desc: "Canal iluminado famoso por Takoyaki, Okonomiyaki e fachadas gigantes em 3D.", query: "Dotonbori Glico Sign" },
+                    { nome: "Den Den Town (Nipponbashi)", tipo: "Games/Eletrônicos", desc: "A 'Akihabara de Osaka', excelente para achar jogos e colecionáveis com ótimos preços.", query: "Nipponbashi Denden Town" },
+                    { nome: "Mercado Kuromon Ichiba", tipo: "Gastronomia", desc: "A 'Cozinha de Osaka': frutos do mar frescos, carnes Wagyu na grelha e frutas.", query: "Kuromon Market Osaka" },
+                    { nome: "Shinsaibashi-suji & Amerikamura", tipo: "Compras", desc: "Galeria comercial coberta quilométrica e bairro jovem de estilo streetwear.", query: "Shinsaibashi-suji Shopping Street" }
+                ]
+            },
+            {
+                cidade: "Osaka",
+                distrito: "Chuo (Castelo de Osaka) & Umeda (Kita)",
+                vibe: "História Samurai & Arranha-céus Modernos",
+                corBadge: "bg-blue-100 text-blue-700",
+                estacoes: "Osakajokoen Sta. (JR Loop Line) • Osaka/Umeda Sta.",
+                dicaLogistica: "Visite o Castelo de Osaka pela manhã e siga para Umeda no fim da tarde para ver o pôr do sol do Umeda Sky Building.",
+                pontos: [
+                    { nome: "Castelo de Osaka (Osaka-jo)", tipo: "História", desc: "Fortaleza histórica cercada por fossos imensos e museu interativo no interior.", query: "Osaka Castle" },
+                    { nome: "Umeda Sky Building (Kuchu Teien)", tipo: "Mirante", desc: "Observatório do Jardim Flutuante com escada rolante suspensa no ar.", query: "Umeda Sky Building" }
+                ]
+            },
+            {
+                cidade: "Osaka",
+                distrito: "Baía de Osaka & Shinsekai",
+                vibe: "Parques Temáticos, Aquário & Osaka Retrô",
+                corBadge: "bg-blue-100 text-blue-700",
+                estacoes: "Universal City Sta. • Osakako Sta. • Dobutsuen-mae Sta.",
+                dicaLogistica: "Reserve 1 dia inteiro exclusivo para a Universal Studios Japan (USJ).",
+                pontos: [
+                    { nome: "Universal Studios Japan (USJ)", tipo: "Parque", desc: "Super Nintendo World, The Wizarding World of Harry Potter e atrações.", query: "Universal Studios Japan" },
+                    { nome: "Aquário de Osaka (Kaiyukan)", tipo: "Família", desc: "Um dos maiores aquários do mundo (tubarão-baleia) ao lado da roda-gigante Tempozan.", query: "Osaka Aquarium Kaiyukan" },
+                    { nome: "Shinsekai & Torre Tsutenkaku", tipo: "Retrô", desc: "Bairro nostálgico famoso pelo Kushikatsu (espetinhos empanados).", query: "Tsutenkaku Shinsekai" }
+                ]
+            },
+            {
+                cidade: "Quioto",
+                distrito: "Sudeste (Fushimi) & Leste (Higashiyama / Gion)",
+                vibe: "Portões Torii Vermelhos & Ruas de Gueixas",
+                corBadge: "bg-amber-100 text-amber-800",
+                estacoes: "Inari Sta. (JR) / Gion-Shijo Sta. (Keihan Line)",
+                dicaLogistica: "A linha de trem Keihan conecta diretamente Osaka (Yodoyabashi), Fushimi Inari e o bairro de Gion em Quioto!",
+                pontos: [
+                    { nome: "Fushimi Inari Taisha", tipo: "Santuário", desc: "Trilha sagrada por milhares de portões Torii vermelhos na montanha.", query: "Fushimi Inari Taisha" },
+                    { nome: "Templo Kiyomizu-dera", tipo: "Templo UNESCO", desc: "Templo famoso pela varanda de madeira gigante construída sem um único prego.", query: "Kiyomizu-dera Kyoto" },
+                    { nome: "Ninenzaka, Sannenzaka & Gion", tipo: "Histórico", desc: "Ladeiras de pedra preservadas com casas de chá e arquitetura tradicional.", query: "Sannenzaka Kyoto" }
+                ]
+            },
+            {
+                cidade: "Quioto",
+                distrito: "Oeste (Arashiyama) & Norte (Kinkaku-ji)",
+                vibe: "Floresta de Bambu & Pavilhão Dourado",
+                corBadge: "bg-amber-100 text-amber-800",
+                estacoes: "Saga-Arashiyama Sta. (JR Sagano Line)",
+                dicaLogistica: "Chegue em Arashiyama antes das 08:30 para tirar fotos na Floresta de Bambu mais vazia.",
+                pontos: [
+                    { nome: "Floresta de Bambu de Arashiyama", tipo: "Natureza", desc: "Caminho icônico cercado por bambuzais gigantes e Templo Tenryu-ji.", query: "Arashiyama Bamboo Grove" },
+                    { nome: "Kinkaku-ji (Pavilhão Dourado)", tipo: "Templo UNESCO", desc: "Templo zen folheado a ouro puro refletido no lago espelhado.", query: "Kinkaku-ji Kyoto" }
+                ]
+            }
+        ];
+
+        // -------------------------------------------------------------------------
+        // 2. DADOS DA TIMELINE
         // -------------------------------------------------------------------------
         let timelineData = [
             {
-                dia: "Dia 1",
-                data: "Janeiro 2027",
-                cidade: "Tóquio",
+                dia: "Dia 1", data: "Janeiro 2027", cidade: "Tóquio",
                 titulo: "Chegada em Tóquio & Check-in",
                 atividades: [
-                    { hora: "Tarde", local: "Aeroporto (NRT/HND)", desc: "Imigração, retirada de IC Cards (Welcome Suica) e trem expresso para o centro.", mapQuery: "Tokyo Station" },
-                    { hora: "Noite", local: "Check-in no Hotel & Jantar Rápido", desc: "Acomodação, descanso do fuso horário e primeira visita a uma loja de conveniência (7-Eleven / Lawson).", mapQuery: "Shinjuku Tokyo" }
+                    { hora: "Tarde", local: "Aeroporto (NRT/HND)", desc: "Imigração, retirada de IC Cards e trem expresso para o centro.", mapQuery: "Tokyo Station" },
+                    { hora: "Noite", local: "Check-in no Hotel & Jantar Rápido", desc: "Acomodação, descanso do fuso horário e primeira visita a uma loja de conveniência.", mapQuery: "Shinjuku Tokyo" }
                 ]
             },
             {
-                dia: "Dia 2",
-                data: "Janeiro 2027",
-                cidade: "Tóquio",
-                titulo: "Tradição em Asakusa & Cultura Pop em Akihabara",
+                dia: "Dia 2", data: "Janeiro 2027", cidade: "Tóquio",
+                titulo: "Asakusa, Skytree & Akihabara",
                 atividades: [
                     { hora: "09:00", local: "Templo Senso-ji & Nakamise-dori", desc: "Portão Kaminarimon, rua comercial histórica e templos de Asakusa.", mapQuery: "Senso-ji Asakusa Tokyo" },
                     { hora: "13:00", local: "Tokyo Skytree / Ueno", desc: "Almoço na região e vista panorâmica.", mapQuery: "Tokyo Skytree" },
-                    { hora: "16:00", local: "Akihabara Electric Town", desc: "Lojas de eletrônicos (Yodobashi Akiba), retro games (Super Potato) e colecionáveis.", mapQuery: "Akihabara Electric Town" }
+                    { hora: "16:00", local: "Akihabara Electric Town", desc: "Lojas de eletrônicos (Yodobashi Akiba), retro games e colecionáveis.", mapQuery: "Akihabara Electric Town" }
                 ]
             },
             {
-                dia: "Dia 3",
-                data: "Janeiro 2027",
-                cidade: "Tóquio",
-                titulo: "Shibuya, Harajuku & Instrumentos em Ochanomizu",
+                dia: "Dia 3", data: "Janeiro 2027", cidade: "Tóquio",
+                titulo: "Harajuku, Ochanomizu (Guitarras) & Shibuya",
                 atividades: [
                     { hora: "09:30", local: "Santuário Meiji Jingu & Harajuku", desc: "Caminhada pela floresta de Meiji Jingu e Takeshita Street.", mapQuery: "Meiji Jingu Tokyo" },
-                    { hora: "14:00", local: "Ochanomizu Guitar Street", desc: "Dezenas de lojas de guitarras e equipamentos musicais lado a lado (Ishibashi, Kurosawa, BigBoss).", mapQuery: "Ochanomizu Station Tokyo" },
-                    { hora: "17:30", local: "Shibuya Crossing & Shibuya Sky", desc: "Estátua do Hachiko, cruzamento famoso, Nintendo Tokyo & Pokémon Center no Shibuya Parco.", mapQuery: "Shibuya Scramble Crossing" }
+                    { hora: "14:00", local: "Ochanomizu Guitar Street", desc: "Dezenas de lojas de guitarras e equipamentos musicais lado a lado.", mapQuery: "Ochanomizu Station Tokyo" },
+                    { hora: "17:30", local: "Shibuya Crossing & Shibuya Parco", desc: "Estátua do Hachiko, cruzamento famoso, Nintendo Tokyo & Pokémon Center.", mapQuery: "Shibuya Scramble Crossing" }
                 ]
             },
             {
-                dia: "Dia 4",
-                data: "Janeiro 2027",
-                cidade: "Tóquio",
+                dia: "Dia 4", data: "Janeiro 2027", cidade: "Tóquio",
                 titulo: "Odaiba, TeamLab & Shinjuku",
                 atividades: [
-                    { hora: "10:00", local: "teamLab Planets / Toyosu", desc: "Experiência imersiva de arte digital.", mapQuery: "teamLab Planets TOKYO" },
+                    { hora: "10:00", local: "teamLab Planets (Toyosu)", desc: "Experiência imersiva de arte digital.", mapQuery: "teamLab Planets TOKYO" },
                     { hora: "14:00", local: "DiverCity Tokyo Plaza (Odaiba)", desc: "Estátua do Gundam em tamanho real e vista da baía de Tóquio.", mapQuery: "Unicorn Gundam Odaiba" },
                     { hora: "19:00", local: "Shinjuku & Godzilla Head", desc: "Letreiros neon de Kabukicho, Godzilla no Hotel Gracery e Omoide Yokocho.", mapQuery: "Godzilla Head Shinjuku" }
                 ]
             },
             {
-                dia: "Dia 5",
-                data: "Janeiro 2027",
-                cidade: "Osaka",
+                dia: "Dia 5", data: "Janeiro 2027", cidade: "Osaka",
                 titulo: "Shinkansen para Osaka & Dotonbori",
                 atividades: [
-                    { hora: "09:00", local: "Estação de Tóquio / Shinagawa", desc: "Embarque no Shinkansen Nozomi rumo a Shin-Osaka (comprar Ekiben para comer no trem).", mapQuery: "Shin-Osaka Station" },
+                    { hora: "09:00", local: "Estação de Tóquio / Shinagawa", desc: "Embarque no Shinkansen Nozomi rumo a Shin-Osaka.", mapQuery: "Shin-Osaka Station" },
                     { hora: "14:00", local: "Castelo de Osaka", desc: "Visita ao parque e à torre principal do castelo histórico.", mapQuery: "Osaka Castle" },
                     { hora: "18:30", local: "Dotonbori & Shinsaibashi", desc: "Letreiro do Glico Man, Takoyaki, Okonomiyaki e gastronomia de rua.", mapQuery: "Dotonbori Glico Sign" }
                 ]
             },
             {
-                dia: "Dia 6",
-                data: "Janeiro 2027",
-                cidade: "Osaka",
+                dia: "Dia 6", data: "Janeiro 2027", cidade: "Osaka",
                 titulo: "Universal Studios Japan (USJ)",
                 atividades: [
-                    { hora: "08:00", local: "Universal Studios Japan", desc: "Super Nintendo World, Harry Potter e atrações principais (chegar cedo).", mapQuery: "Universal Studios Japan" }
+                    { hora: "08:00", local: "Universal Studios Japan", desc: "Super Nintendo World, Harry Potter e atrações principais.", mapQuery: "Universal Studios Japan" }
                 ]
             },
             {
-                dia: "Dia 7",
-                data: "Janeiro 2027",
-                cidade: "Osaka",
-                titulo: "Bate-volta: Quioto Clássica ou Nara",
+                dia: "Dia 7", data: "Janeiro 2027", cidade: "Osaka",
+                titulo: "Bate-volta: Quioto Clássica & Den Den Town",
                 atividades: [
                     { hora: "08:30", local: "Fushimi Inari Taisha (Quioto)", desc: "Caminhada pelos milhares de portões Torii vermelhos.", mapQuery: "Fushimi Inari Taisha" },
                     { hora: "12:00", local: "Kiyomizu-dera & Distrito de Gion", desc: "Ruas históricas de Ninenzaka, Sannenzaka e templos tradicionais.", mapQuery: "Kiyomizu-dera Kyoto" },
@@ -335,36 +466,81 @@
         ];
 
         // -------------------------------------------------------------------------
-        // LUGARES DESTACADOS (Acesso Rápido no Google Maps)
+        // 3. RENDERIZAÇÃO DA ABA DISTRITOS
         // -------------------------------------------------------------------------
-        const savedPlaces = [
-            {
-                categoria: "Destaques Imperdíveis & Cultura Pop",
-                icone: "fa-gamepad",
-                cor: "text-red-600",
-                itens: [
-                    { nome: "Ochanomizu (Rua das Guitarras)", cidade: "Tóquio", desc: "Maior concentração de lojas de instrumentos musicais do Japão.", query: "Ochanomizu Station Tokyo" },
-                    { nome: "Akihabara Electric Town", cidade: "Tóquio", desc: "Yodobashi Camera, Super Potato, Mandarake e arcades.", query: "Akihabara Station" },
-                    { nome: "Shibuya Parco (Nintendo & Pokémon)", cidade: "Tóquio", desc: "6º andar dedicado a Nintendo Tokyo, Pokémon Center e Capcom Store.", query: "Shibuya PARCO" },
-                    { nome: "Super Nintendo World (USJ)", cidade: "Osaka", desc: "Área temática interativa da Nintendo na Universal Studios.", query: "Super Nintendo World Osaka" }
-                ]
-            },
-            {
-                categoria: "Pontos Históricos & Vistas",
-                icone: "fa-torii-gate",
-                cor: "text-amber-600",
-                itens: [
-                    { nome: "Templo Senso-ji (Asakusa)", cidade: "Tóquio", desc: "Templo budista mais antigo de Tóquio e rua Nakamise.", query: "Senso-ji Tokyo" },
-                    { nome: "Shibuya Sky / Cruzamento", cidade: "Tóquio", desc: "Observatório 360º a céu aberto e estátua do Hachiko.", query: "Shibuya Sky" },
-                    { nome: "Dotonbori & Canal", cidade: "Osaka", desc: "Coração gastronômico e iluminado de Osaka (Glico Man).", query: "Dotonbori Osaka" },
-                    { nome: "Castelo de Osaka", cidade: "Osaka", desc: "Um dos marcos históricos mais famosos do Japão.", query: "Osaka Castle" },
-                    { nome: "Fushimi Inari Taisha", cidade: "Quioto", desc: "Trilha pelos portões Torii vermelhos (30 min de trem de Osaka).", query: "Fushimi Inari Taisha" }
-                ]
-            }
-        ];
+        function renderDistricts(filterCity = 'todos') {
+            const container = document.getElementById('districts-container');
+            container.innerHTML = '';
+
+            const filtered = filterCity === 'todos' 
+                ? districtsData 
+                : districtsData.filter(d => d.cidade.toLowerCase().includes(filterCity.toLowerCase()));
+
+            filtered.forEach(dist => {
+                const regionMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dist.distrito + ' ' + dist.cidade)}`;
+                
+                let pontosHTML = '';
+                dist.pontos.forEach(p => {
+                    const pUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.query)}`;
+                    pontosHTML += `
+                        <a href="${pUrl}" target="_blank" class="flex items-start justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 transition group">
+                            <div class="pr-2">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs font-bold text-slate-800 group-hover:text-red-600 transition">${p.nome}</span>
+                                    <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-500">${p.tipo}</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">${p.desc}</p>
+                            </div>
+                            <span class="text-slate-400 group-hover:text-red-600 p-1 shrink-0">
+                                <i class="fa-solid fa-diamond-turn-right text-xs"></i>
+                            </span>
+                        </a>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100">
+                            <div class="flex justify-between items-start gap-2">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${dist.corBadge}">${dist.cidade}</span>
+                                    <h3 class="text-base font-bold text-slate-800 mt-1">${dist.distrito}</h3>
+                                    <p class="text-xs text-slate-500 font-medium">${dist.vibe}</p>
+                                </div>
+                                <a href="${regionMapUrl}" target="_blank" class="text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-map"></i> Mapa Geral
+                                </a>
+                            </div>
+
+                            <!-- Estação e Dica -->
+                            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] space-y-1">
+                                <p class="text-slate-700"><i class="fa-solid fa-train-subway text-slate-400 mr-1.5"></i><strong>Estações:</strong> ${dist.estacoes}</p>
+                                <p class="text-amber-800 bg-amber-50/70 px-2 py-1 rounded"><i class="fa-regular fa-lightbulb mr-1"></i>${dist.dicaLogistica}</p>
+                            </div>
+                        </div>
+                        <div class="p-3 space-y-2 bg-white">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Pontos para visitar neste distrito (${dist.pontos.length})</p>
+                            ${pontosHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterDistricts(city) {
+            renderDistricts(city);
+            const buttons = document.querySelectorAll('.dist-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(city.toLowerCase()) || (city === 'todos' && btn.textContent.includes('Todas'))) {
+                    btn.className = "dist-btn bg-red-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition";
+                } else {
+                    btn.className = "dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition";
+                }
+            });
+        }
 
         // -------------------------------------------------------------------------
-        // FUNÇÕES DE RENDERIZAÇÃO
+        // 4. RENDERIZAÇÃO DA TIMELINE E LUGARES SALVOS
         // -------------------------------------------------------------------------
         function renderTimeline(filterCity = 'todos') {
             const container = document.getElementById('timeline-container');
@@ -398,7 +574,7 @@
                     `;
                 });
 
-                const card = `
+                container.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                         <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
                             <div>
@@ -409,18 +585,14 @@
                                 ${diaObj.cidade}
                             </span>
                         </div>
-                        <div class="space-y-3 mt-2">
-                            ${atividadesHTML}
-                        </div>
+                        <div class="space-y-3 mt-2">${atividadesHTML}</div>
                     </div>
                 `;
-                container.innerHTML += card;
             });
         }
 
         function filterTimeline(city) {
             renderTimeline(city);
-            // Atualiza estilo dos botões
             const buttons = document.querySelectorAll('.filter-btn');
             buttons.forEach(btn => {
                 if (btn.textContent.toLowerCase().includes(city.toLowerCase()) || (city === 'todos' && btn.textContent === 'Todos')) {
@@ -433,23 +605,33 @@
 
         function renderPlaces() {
             const container = document.getElementById('places-container');
+            const searchTerm = (document.getElementById('place-search')?.value || '').toLowerCase();
             container.innerHTML = '';
 
-            savedPlaces.forEach(cat => {
+            districtsData.forEach(dist => {
+                const matchingPoints = dist.pontos.filter(p => 
+                    p.nome.toLowerCase().includes(searchTerm) || 
+                    p.desc.toLowerCase().includes(searchTerm) || 
+                    p.tipo.toLowerCase().includes(searchTerm) ||
+                    dist.distrito.toLowerCase().includes(searchTerm)
+                );
+
+                if (matchingPoints.length === 0) return;
+
                 let itemsHTML = '';
-                cat.itens.forEach(item => {
+                matchingPoints.forEach(item => {
                     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.query)}`;
                     itemsHTML += `
-                        <a href="${url}" target="_blank" class="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg border border-slate-100 transition">
+                        <a href="${url}" target="_blank" class="flex items-center justify-between p-2.5 hover:bg-slate-50 rounded-lg border border-slate-100 transition">
                             <div class="pr-2">
                                 <div class="flex items-center space-x-2">
-                                    <h4 class="text-sm font-bold text-slate-800">${item.nome}</h4>
-                                    <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-semibold">${item.cidade}</span>
+                                    <h4 class="text-xs font-bold text-slate-800">${item.nome}</h4>
+                                    <span class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-semibold">${item.tipo}</span>
                                 </div>
-                                <p class="text-xs text-slate-500 mt-0.5">${item.desc}</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">${item.desc}</p>
                             </div>
-                            <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-diamond-turn-right text-sm"></i>
+                            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-location-arrow text-xs"></i>
                             </div>
                         </a>
                     `;
@@ -457,19 +639,18 @@
 
                 container.innerHTML += `
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3.5">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2.5 flex items-center">
-                            <i class="fa-solid ${cat.icone} ${cat.cor} mr-1.5"></i> ${cat.categoria}
-                        </h4>
-                        <div class="space-y-2">
-                            ${itemsHTML}
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">${dist.distrito}</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${dist.corBadge}">${dist.cidade}</span>
                         </div>
+                        <div class="space-y-1.5">${itemsHTML}</div>
                     </div>
                 `;
             });
         }
 
         // -------------------------------------------------------------------------
-        // SINCRONIZAÇÃO COM GOOGLE SHEETS (ABA TIMELINE)
+        // 5. SINCRONIZAÇÃO COM GOOGLE SHEETS (ABA TIMELINE)
         // -------------------------------------------------------------------------
         function trySyncSheet() {
             const statusBox = document.getElementById('sync-status');
@@ -495,7 +676,6 @@
         }
 
         function parseSheetRowsToTimeline(rows) {
-            // Agrupa linhas da planilha por Dia/Data se existirem colunas correspondentes
             const grouped = {};
             rows.forEach((row, idx) => {
                 const keys = Object.keys(row);
@@ -539,7 +719,7 @@
         }
 
         // -------------------------------------------------------------------------
-        // NAVEGAÇÃO ENTRE ABAS E UTILITÁRIOS
+        // 6. NAVEGAÇÃO ENTRE ABAS E CONVERSOR
         // -------------------------------------------------------------------------
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -558,16 +738,15 @@
 
         function convertCurrency() {
             const yen = parseFloat(document.getElementById('yen-input').value) || 0;
-            const rate = 0.038; // Taxa média aproximada
+            const rate = 0.038;
             const brl = (yen * rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             document.getElementById('brl-output').textContent = brl;
         }
 
-        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             renderTimeline('todos');
+            renderDistricts('todos');
             renderPlaces();
-            // Tenta sincronizar silenciosamente ao abrir se estiver publicado
             trySyncSheet();
         });
     </script>
