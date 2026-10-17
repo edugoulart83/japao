@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- PapaParse para ler CSV do Google Sheets -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Leaflet CSS & JS (Mapa Interativo) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -26,6 +30,46 @@
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Estilos do Mapa Interativo */
+        #interactive-map {
+            height: 330px;
+            width: 100%;
+            border-radius: 1rem;
+            z-index: 10;
+        }
+        .custom-pin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            color: white;
+            font-size: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            border: 2px solid white;
+            transition: transform 0.15s ease;
+        }
+        .custom-pin:hover {
+            transform: scale(1.2);
+        }
+        .district-label {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #1e293b;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 2px;
+        }
+        .leaflet-popup-content {
+            margin: 10px 12px;
+        }
     </style>
 </head>
 <body class="pb-24 text-slate-800">
@@ -37,7 +81,7 @@
                 <i class="fa-solid fa-torii-gate text-xl"></i>
                 <div>
                     <h1 class="text-lg font-bold leading-tight">Japão • Jan 2027</h1>
-                    <p class="text-[11px] text-red-100 leading-none">10/Jan a 29/Jan • Tóquio & Osaka</p>
+                    <p class="text-[11px] text-red-100 leading-none">10/Jan a 29/Jan • Tóquio, Osaka & Quioto</p>
                 </div>
             </div>
             <button onclick="openPasteModal()" 
@@ -53,26 +97,22 @@
         <!-- ================= ABA 1: TIMELINE ================= -->
         <section id="tab-timeline" class="tab-content active">
             
-            <!-- Barra de Filtro de Cidades / Fases -->
             <div class="flex space-x-2 overflow-x-auto no-scrollbar pb-2 mb-2" id="city-filters">
                 <button onclick="filterTimeline('todos')" class="filter-btn bg-slate-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">Todos (10 a 29/Jan)</button>
                 <button onclick="filterTimeline('Tóquio')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🗼 Tóquio (12 a 23/Jan)</button>
                 <button onclick="filterTimeline('Osaka')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🏯 Osaka / Quioto (24 a 28/Jan)</button>
-                <button onclick="filterTimeline('Voos')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">✈️ Voos / Trânsito</button>
+                <button onclick="filterTimeline('Voos')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">✈️ Voos</button>
             </div>
 
-            <!-- Seletor Rápido de Dias (Carrossel de Datas) -->
-            <div class="flex space-x-1.5 overflow-x-auto no-scrollbar py-2 mb-3 border-y border-slate-200" id="day-jumper">
-                <!-- Preenchido via JS -->
-            </div>
+            <!-- Carrossel de Datas -->
+            <div class="flex space-x-1.5 overflow-x-auto no-scrollbar py-2 mb-3 border-y border-slate-200" id="day-jumper"></div>
 
             <!-- Status de Sincronização Matricial -->
             <div id="sync-status" class="mb-3 bg-blue-50 border border-blue-200 rounded-lg p-2.5 text-xs text-blue-700 flex items-center justify-between">
-                <span><i class="fa-solid fa-table-cells mr-1"></i> Leitor configurado: Linha 1 (Sem), Linha 2 (Dia), Col B (Hora).</span>
-                <button onclick="trySyncSheet()" class="underline font-semibold ml-2 shrink-0">Ler Planilha</button>
+                <span><i class="fa-solid fa-table-cells mr-1"></i> Leitor: Linha 1 (Sem), Linha 2 (Dia), Col B (Hora).</span>
+                <button onclick="trySyncSheet()" class="underline font-semibold ml-2 shrink-0">Sincronizar</button>
             </div>
 
-            <!-- Lista da Timeline -->
             <div id="timeline-container" class="space-y-4"></div>
 
         </section>
@@ -81,44 +121,69 @@
         <section id="tab-distritos" class="tab-content">
             
             <div class="mb-3">
-                <h2 class="text-base font-bold text-slate-800">Explorar por Distrito / Região</h2>
-                <p class="text-xs text-slate-500">Agrupamento geográfico para otimizar os deslocamentos a partir das bases em Kinshicho (Sumida) e Namba (Osaka).</p>
+                <h2 class="text-base font-bold text-slate-800">Guia de Distritos & Logística</h2>
+                <p class="text-xs text-slate-500">Melhores conexões de metrô/JR partindo de Kinshicho (Tóquio) e Namba South (Osaka).</p>
             </div>
 
-            <!-- Filtro de Cidade para Distritos -->
             <div class="flex space-x-2 overflow-x-auto no-scrollbar pb-3 mb-2" id="district-filters">
                 <button onclick="filterDistricts('todos')" class="dist-btn bg-red-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">Todas as Regiões</button>
-                <button onclick="filterDistricts('Tóquio')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🗼 Tóquio (5)</button>
-                <button onclick="filterDistricts('Osaka')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🏯 Osaka (3)</button>
-                <button onclick="filterDistricts('Quioto')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">⛩️ Quioto (2)</button>
+                <button onclick="filterDistricts('Tóquio')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🗼 Tóquio</button>
+                <button onclick="filterDistricts('Osaka')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🏯 Osaka</button>
+                <button onclick="filterDistricts('Quioto')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">⛩️ Quioto</button>
             </div>
 
             <div id="districts-container" class="space-y-4"></div>
 
         </section>
 
-        <!-- ================= ABA 3: LUGARES SALVOS (MAPS) ================= -->
+        <!-- ================= ABA 3: SALVOS MAPS (MAPA INTERATIVO POR DISTRITO) ================= -->
         <section id="tab-lugares" class="tab-content">
             
-            <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-5 text-white shadow-lg mb-5 relative overflow-hidden">
-                <i class="fa-solid fa-map-location-dot text-7xl absolute -right-3 -bottom-3 text-white/10"></i>
-                <span class="bg-white/20 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded">Google Maps Oficial</span>
-                <h2 class="text-xl font-bold mt-2">Lista de Lugares Salvos</h2>
-                <p class="text-xs text-emerald-100 mt-1 mb-4">Acesse todos os pins, restaurantes e atrações salvos na lista compartilhada diretamente no app do Google Maps.</p>
+            <!-- Seletor de Cidade do Mapa -->
+            <div class="flex items-center justify-between mb-2.5">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800">Mapa Interativo por Distrito</h2>
+                    <p class="text-[11px] text-slate-500">Toque em um distrito colorido ou pino para rotas.</p>
+                </div>
                 <a href="https://maps.app.goo.gl/aFx7LsTvQDcHcHFMA" target="_blank" 
-                   class="inline-flex items-center justify-center w-full bg-white text-emerald-800 font-bold text-sm py-2.5 px-4 rounded-xl shadow hover:bg-emerald-50 transition">
-                    <i class="fa-solid fa-location-arrow mr-2"></i> Abrir Lista Completa no Maps
+                   class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1 shrink-0">
+                    <i class="fa-solid fa-up-right-from-square"></i> Lista Original
                 </a>
             </div>
 
-            <!-- Busca Rápida de Lugar -->
-            <div class="relative mb-4">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                <input type="text" id="place-search" oninput="renderPlaces()" placeholder="Filtrar ponto (ex: Guitar, Kinshicho, Nintendo, Namba)..." 
+            <!-- Botões de Cidades do Mapa -->
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <button onclick="setMapCity('Tóquio')" id="map-city-Tóquio" class="map-city-btn bg-slate-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition">
+                    <span>🗼</span> Tóquio
+                </button>
+                <button onclick="setMapCity('Osaka')" id="map-city-Osaka" class="map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition">
+                    <span>🏯</span> Osaka
+                </button>
+                <button onclick="setMapCity('Quioto')" id="map-city-Quioto" class="map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition">
+                    <span>⛩️</span> Quioto
+                </button>
+            </div>
+
+            <!-- Container do Mapa Interativo Leaflet -->
+            <div class="relative mb-3 shadow-md rounded-2xl border border-slate-200 overflow-hidden bg-slate-100">
+                <div id="interactive-map"></div>
+                <button onclick="resetCityZoom()" class="absolute top-2.5 right-2.5 z-[400] bg-white/95 hover:bg-white text-slate-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow border border-slate-200 flex items-center gap-1">
+                    <i class="fa-solid fa-expand"></i> Visão Geral
+                </button>
+            </div>
+
+            <!-- Pílulas de Distritos da Cidade Atual (Legenda Clicável) -->
+            <div class="flex space-x-1.5 overflow-x-auto no-scrollbar pb-2 mb-3" id="map-district-pills"></div>
+
+            <!-- Busca Rápida -->
+            <div class="relative mb-3">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-xs"></i>
+                <input type="text" id="place-search" oninput="renderPlacesList()" placeholder="Buscar local salvo (ex: Guitar, Nintendo, Senso-ji, Hotel)..." 
                        class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 shadow-sm">
             </div>
 
-            <div class="space-y-3" id="places-container"></div>
+            <!-- Lista de Locais Organizados por Distrito com Botão de Direções -->
+            <div class="space-y-4" id="places-container"></div>
 
         </section>
 
@@ -127,7 +192,7 @@
             
             <div class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-r-xl mb-5 text-xs text-amber-900">
                 <p class="font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Dica para suas Bases (Kinshicho & Namba):</p>
-                <p>Em Tóquio, a estação <strong>Kinshicho</strong> tem acesso direto à linha <em>JR Sobu</em> (rápida p/ Akihabara, Ochanomizu e Shinjuku) e à linha <em>Tokyo Metro Hanzomon</em> (direta p/ Skytree e Shibuya). Em Osaka, <strong>Namba</strong> conecta direto a Dotonbori a pé e à linha <em>Midosuji</em> (Shin-Osaka e Umeda).</p>
+                <p>Em Tóquio, a estação <strong>Kinshicho</strong> tem acesso direto à linha <em>JR Sobu</em> (rápida p/ Akihabara, Ochanomizu e Shinjuku) e à linha <em>Tokyo Metro Hanzomon</em> (direta p/ Skytree e Shibuya). Em Osaka, <strong>Namba South</strong> conecta direto a Shinsekai e Dotonbori.</p>
             </div>
 
             <!-- Calculadora / Conversor Rápido -->
@@ -172,7 +237,7 @@
                             </div>
                         </div>
                         <p class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded">
-                            <strong>Tarifa Infantil (6 a 11 anos):</strong> Paga exatamente <strong>50% da tarifa</strong> com um Child Suica/Pasmo nominal.
+                            <strong>Tarifa Infantil (6 a 11 anos):</strong> Paga exatamente <strong>50% da tarifa</strong> com um Child Suica/Pasmo.
                         </p>
                     </div>
                 </div>
@@ -194,24 +259,8 @@
                             </div>
                         </div>
                         <p class="text-[11px] text-amber-800 bg-amber-50 p-2 rounded">
-                            <strong><i class="fa-solid fa-suitcase mr-1"></i> Despacho de Malas (Takkyubin):</strong> Enviar as malas grandes de Sumida (Tóquio) para Namba (Osaka) custa cerca de <strong>¥2.500 a ¥3.200 por mala</strong> e libera a família para viajar leve.
+                            <strong><i class="fa-solid fa-suitcase mr-1"></i> Despacho de Malas (Takkyubin):</strong> Enviar as malas grandes de Sumida (Tóquio) para Namba (Osaka) custa cerca de <strong>¥2.500 a ¥3.200 por mala</strong>.
                         </p>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-purple-700 text-white px-4 py-2.5 flex justify-between items-center">
-                        <span class="font-bold text-sm"><i class="fa-solid fa-plane-arrival mr-1.5"></i> Conexão Haneda (HND)</span>
-                        <span class="text-[11px] bg-purple-800 px-2 py-0.5 rounded">Chegada 12/Jan & Volta 28/Jan</span>
-                    </div>
-                    <div class="p-4 space-y-3 text-xs">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-bold text-slate-800 text-sm">Aeroporto de Haneda (HND) ➔ Kinshicho (Sumida)</p>
-                                <p class="text-slate-500">Linha Keikyu Airport até Sengakuji/Asakusa ou Monorail + JR (~45 a 50 min no total) ou Airport Limousine Bus direto para Kinshicho.</p>
-                            </div>
-                            <span class="font-bold text-purple-700 bg-purple-50 px-2 py-1 rounded whitespace-nowrap ml-2">¥650 ~ ¥1.200</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -219,7 +268,7 @@
 
     </main>
 
-    <!-- Modal para Colar Dados da Aba Timeline (Caso a planilha esteja privada) -->
+    <!-- Modal para Colar Dados da Aba Timeline -->
     <div id="paste-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-4 shadow-xl">
             <div class="flex justify-between items-center mb-2">
@@ -227,13 +276,13 @@
                 <button onclick="closePasteModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <p class="text-[11px] text-slate-500 mb-3">
-                Se a sua planilha não estiver publicada na web, selecione da célula <strong>A1</strong> até o final da sua aba <strong>Timeline</strong> no Google Sheets, copie (<kbd>Ctrl+C</kbd>) e cole abaixo:
+                Selecione da célula <strong>A1</strong> até o final da aba <strong>Timeline</strong> no Google Sheets, copie (<kbd>Ctrl+C</kbd>) e cole abaixo:
             </p>
             <textarea id="tsv-input" rows="6" placeholder="Cole aqui as células copiadas da aba Timeline (Linha 1: Dias da Semana, Linha 2: Dias do Mês, Coluna B: Horas)..." 
                       class="w-full p-2.5 border border-slate-300 rounded-xl text-xs font-mono focus:outline-none focus:border-red-500 mb-3"></textarea>
             <div class="flex justify-end space-x-2">
                 <button onclick="resetSavedMatrix()" class="text-xs text-slate-500 px-3 py-2 rounded-lg hover:bg-slate-100">Restaurar Padrão</button>
-                <button onclick="processPastedMatrix()" class="bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-red-700">Importar e Salvar no Celular</button>
+                <button onclick="processPastedMatrix()" class="bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-red-700">Importar e Salvar</button>
             </div>
         </div>
     </div>
@@ -246,11 +295,11 @@
                 <span class="text-[10px]">Timeline</span>
             </button>
             <button onclick="switchTab('distritos')" id="nav-distritos" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
-                <i class="fa-solid fa-map text-base mb-0.5"></i>
+                <i class="fa-solid fa-signs-post text-base mb-0.5"></i>
                 <span class="text-[10px]">Distritos</span>
             </button>
             <button onclick="switchTab('lugares')" id="nav-lugares" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
-                <i class="fa-solid fa-location-dot text-base mb-0.5"></i>
+                <i class="fa-solid fa-map-location-dot text-base mb-0.5"></i>
                 <span class="text-[10px]">Salvos Maps</span>
             </button>
             <button onclick="switchTab('transporte')" id="nav-transporte" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
@@ -263,12 +312,517 @@
     <!-- ================= SCRIPTS E DADOS ================= -->
     <script>
         const SHEET_NAME = 'Timeline';
-        // Extrai dinamicamente o ID do link oficial presente no cabeçalho ou usa o configurado
-        const CSV_URL = `https://docs.google.com/spreadsheets/d/1VC468A5pPLkf0rNZBxO7uSJBauq3fdUCyGkZ3PCDskk/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
 
         // -------------------------------------------------------------------------
-        // 1. CRONOGRAMA REAL DE JANEIRO DE 2027 (10/01 a 29/01/2027)
-        // Estruturado com Dias da Semana (Linha 1), Dias do Mês (Linha 2) e Horas (Coluna B)
+        // 1. DADOS GEOGRÁFICOS DOS DISTRITOS E PONTOS SALVOS (TÓQUIO, OSAKA E QUIOTO)
+        // Cada distrito possui polígono delimitador, cor visual própria e coordenadas exatas
+        // -------------------------------------------------------------------------
+        const cityConfigs = {
+            'Tóquio': { center: [35.6850, 139.7550], zoom: 11 },
+            'Osaka':  { center: [34.6680, 135.4950], zoom: 12 },
+            'Quioto': { center: [35.0050, 135.7400], zoom: 11 }
+        };
+
+        const districtsData = [
+            // ==================== TÓQUIO (6 DISTRITOS) ====================
+            {
+                id: "tk-sumida",
+                cidade: "Tóquio",
+                distrito: "Sumida & Asakusa",
+                curto: "Sumida / Asakusa",
+                vibe: "Nossa Base em Tóquio • Templos & Skytree",
+                corHex: "#dc2626", // Vermelho
+                corBadge: "bg-red-100 text-red-700",
+                estacoes: "Kinshicho Sta. (JR Sobu / Hanzomon) • Asakusa Sta. • Oshiage Sta.",
+                dicaLogistica: "Base em Kinshicho! Fica a 1 estação da Skytree e tem shoppings completos (Arcakit, Parco e Termina) ao lado da estação.",
+                center: [35.7060, 139.8060],
+                zoom: 13,
+                polygon: [
+                    [35.722, 139.788], [35.722, 139.825], [35.690, 139.825], [35.690, 139.788]
+                ],
+                pontos: [
+                    { nome: "Estação Kinshicho & Shoppings (Base)", tipo: "Hospedagem", icone: "fa-bed", lat: 35.6967, lng: 139.8144, desc: "Nossa base em Sumida. Arcakit (Daiso gigante), Parco (Pokemon/Lojas) e conexão JR/Metrô.", query: "Kinshicho Station Tokyo" },
+                    { nome: "Tokyo Skytree & Solamachi", tipo: "Mirante", icone: "fa-tower-observation", lat: 35.7100, lng: 139.8107, desc: "Torre mais alta do Japão (634m), shopping Solamachi e Pokémon Center Skytree.", query: "Tokyo Skytree" },
+                    { nome: "Templo Senso-ji & Kaminarimon", tipo: "Templo", icone: "fa-torii-gate", lat: 35.7147, lng: 139.7966, desc: "Templo budista mais antigo de Tóquio e lanterna vermelha gigante.", query: "Senso-ji Asakusa Tokyo" },
+                    { nome: "Rua Comercial Nakamise-dori", tipo: "Compras/Doces", icone: "fa-bag-shopping", lat: 35.7125, lng: 139.7964, desc: "Souvenirs tradicionais, Melonpan e petiscos históricos.", query: "Nakamise Shopping Street Asakusa" }
+                ]
+            },
+            {
+                id: "tk-akiba",
+                cidade: "Tóquio",
+                distrito: "Akihabara, Ochanomizu & Ueno",
+                curto: "Akihabara / Guitarras",
+                vibe: "Rua das Guitarras, Eletrônicos, Games & Parque Ueno",
+                corHex: "#2563eb", // Azul
+                corBadge: "bg-blue-100 text-blue-700",
+                estacoes: "Akihabara Sta. / Ochanomizu Sta. (Linha JR Sobu direta de Kinshicho em 6 min!)",
+                dicaLogistica: "O trem amarelo JR Sobu sai de Kinshicho e deixa você direto na porta de Akihabara e Ochanomizu sem baldeação.",
+                center: [35.7040, 139.7710],
+                zoom: 14,
+                polygon: [
+                    [35.720, 139.758], [35.720, 139.784], [35.693, 139.784], [35.693, 139.758]
+                ],
+                pontos: [
+                    { nome: "Ochanomizu Guitar Street", tipo: "Música", icone: "fa-guitar", lat: 35.6995, lng: 139.7640, desc: "Mais de 50 lojas de guitarras, pedais e amplificadores (Ishibashi, Kurosawa, ESP BigBoss).", query: "Ochanomizu Station Tokyo" },
+                    { nome: "Yodobashi Camera Multimedia Akiba", tipo: "Eletrônicos", icone: "fa-plug", lat: 35.6987, lng: 139.7747, desc: "Megastore de 9 andares de tecnologia, áudio, ferramentas e brinquedos.", query: "Yodobashi Akiba" },
+                    { nome: "Super Potato & Radio Kaikan (Akihabara)", tipo: "Games/Geek", icone: "fa-gamepad", lat: 35.6996, lng: 139.7706, desc: "Lojas lendárias de retro-games, fliperamas e colecionáveis.", query: "Super Potato Akihabara" },
+                    { nome: "Parque Ueno & Museu Nacional", tipo: "Parque/Cultura", icone: "fa-tree", lat: 35.7147, lng: 139.7734, desc: "Grande parque cultural, templos e museus.", query: "Ueno Park Tokyo" },
+                    { nome: "Mercado Ameyoko", tipo: "Mercado de Rua", icone: "fa-store", lat: 35.7095, lng: 139.7746, desc: "Rua comercial vibrante sob os trilhos do trem entre Ueno e Okachimachi.", query: "Ameyoko Shopping District" }
+                ]
+            },
+            {
+                id: "tk-shibuya",
+                cidade: "Tóquio",
+                distrito: "Shibuya & Harajuku",
+                curto: "Shibuya / Harajuku",
+                vibe: "Cruzamento Famoso, Nintendo Tokyo & Santuário Meiji",
+                corHex: "#9333ea", // Roxo
+                corBadge: "bg-purple-100 text-purple-700",
+                estacoes: "Shibuya Sta. (Linha Hanzomon direta de Kinshicho) • Harajuku Sta.",
+                dicaLogistica: "Pegue a linha roxa (Hanzomon) em Kinshicho e desça direto dentro da estação de Shibuya.",
+                center: [35.6650, 139.7010],
+                zoom: 14,
+                polygon: [
+                    [35.680, 139.690], [35.680, 139.712], [35.654, 139.712], [35.654, 139.690]
+                ],
+                pontos: [
+                    { nome: "Shibuya Scramble Crossing & Hachiko", tipo: "Ícone", icone: "fa-users", lat: 35.6595, lng: 139.7004, desc: "O cruzamento mais famoso do mundo e a estátua do cão Hachiko.", query: "Shibuya Scramble Crossing" },
+                    { nome: "Shibuya PARCO (Nintendo & Pokémon)", tipo: "Games", icone: "fa-gamepad", lat: 35.6620, lng: 139.6988, desc: "6º andar com Nintendo Tokyo, Pokémon Center, Capcom Store e Jump Shop.", query: "Shibuya PARCO" },
+                    { nome: "Shibuya Sky", tipo: "Mirante", icone: "fa-cloud-sun", lat: 35.6584, lng: 139.7022, desc: "Observatório 360º a céu aberto no topo do Shibuya Scramble Square.", query: "Shibuya Sky" },
+                    { nome: "Santuário Meiji Jingu", tipo: "Santuário", icone: "fa-torii-gate", lat: 35.6764, lng: 139.6993, desc: "Santuário xintoísta monumental cercado por uma floresta em Harajuku.", query: "Meiji Jingu Tokyo" },
+                    { nome: "Takeshita Street (Harajuku)", tipo: "Cultura Jovem", icone: "fa-ice-cream", lat: 35.6715, lng: 139.7031, desc: "Rua famosa por crepes, doces e moda jovem japonesa.", query: "Takeshita Street Harajuku" }
+                ]
+            },
+            {
+                id: "tk-shinjuku",
+                cidade: "Tóquio",
+                distrito: "Shinjuku, Nakano & Ikebukuro",
+                curto: "Shinjuku / Nakano",
+                vibe: "Arranha-céus, Luzes Neon, Godzilla & Colecionáveis",
+                corHex: "#d97706", // Âmbar/Laranja
+                corBadge: "bg-amber-100 text-amber-800",
+                estacoes: "Shinjuku Sta. / Nakano Sta. (Linha JR Chuo-Sobu direta de Kinshicho)",
+                dicaLogistica: "Ótima região para combinar mirante gratuito no fim da tarde e luzes neon de Kabukicho à noite.",
+                center: [35.6980, 139.6950],
+                zoom: 13,
+                polygon: [
+                    [35.735, 139.660], [35.735, 139.725], [35.682, 139.725], [35.682, 139.660]
+                ],
+                pontos: [
+                    { nome: "Godzilla Head & Kabukicho", tipo: "Ícone", icone: "fa-dragon", lat: 35.6950, lng: 139.7021, desc: "Cabeça gigante do Godzilla no terraço do Hotel Gracery Shinjuku.", query: "Godzilla Head Shinjuku" },
+                    { nome: "Tokyo Metropolitan Government Building", tipo: "Mirante Grátis", icone: "fa-building", lat: 35.6896, lng: 139.6917, desc: "Observatório gratuito no 45º andar e projeção mapeada noturna.", query: "Tokyo Metropolitan Government Building" },
+                    { nome: "Omoide Yokocho (Shinjuku)", tipo: "Gastronomia", icone: "fa-utensils", lat: 35.6930, lng: 139.6995, desc: "Vielas históricas iluminadas por lanternas com barracas de yakitori.", query: "Omoide Yokocho Shinjuku" },
+                    { nome: "Nakano Broadway", tipo: "Retrô/Geek", icone: "fa-robot", lat: 35.7092, lng: 139.6657, desc: "Shopping tradicional com dezenas de lojas Mandarake e itens raros.", query: "Nakano Broadway" },
+                    { nome: "Sunshine City (Ikebukuro)", tipo: "Shopping/Pokemon", icone: "fa-star", lat: 35.7289, lng: 139.7196, desc: "Complexo com Pokémon Center Mega Tokyo e maior loja de Gashapon.", query: "Sunshine City Ikebukuro" }
+                ]
+            },
+            {
+                id: "tk-centro",
+                cidade: "Tóquio",
+                distrito: "Chiyoda, Ginza & Minato",
+                curto: "Ginza / Tokyo Tower",
+                vibe: "Tokyo Station, Palácio Imperial, Flagships & Torre de Tóquio",
+                corHex: "#0d9488", // Teal
+                corBadge: "bg-teal-100 text-teal-800",
+                estacoes: "Tokyo Sta. (8 min de Kinshicho pela JR Sobu Rapid) • Ginza Sta.",
+                dicaLogistica: "A Tokyo Station tem a famosa Ramen Street e a Character Street no subsolo.",
+                center: [35.6720, 139.7600],
+                zoom: 13,
+                polygon: [
+                    [35.690, 139.742], [35.690, 139.778], [35.654, 139.778], [35.654, 139.742]
+                ],
+                pontos: [
+                    { nome: "Tokyo Station (Ramen & Character Street)", tipo: "Gastronomia/Lojas", icone: "fa-train", lat: 35.6812, lng: 139.7671, desc: "Ramen Street com os melhores ramens do Japão e lojas oficiais de personagens.", query: "Tokyo Character Street" },
+                    { nome: "Jardins do Palácio Imperial", tipo: "História", icone: "fa-landmark", lat: 35.6852, lng: 139.7528, desc: "Antigo Castelo Edo, pontes históricas e jardins imperiais.", query: "Imperial Palace East Gardens" },
+                    { nome: "Ginza (Uniqlo Flagship & Itoya)", tipo: "Compras", icone: "fa-bag-shopping", lat: 35.6712, lng: 139.7650, desc: "Uniqlo de 12 andares, papelaria gigante Itoya e Nissan Crossing.", query: "Uniqlo Ginza" },
+                    { nome: "Torre de Tóquio & Templo Zojo-ji", tipo: "Cartão-Postal", icone: "fa-broadcast-tower", lat: 35.6586, lng: 139.7454, desc: "A clássica torre vermelha e branca vista do pátio do templo Zojo-ji.", query: "Tokyo Tower" }
+                ]
+            },
+            {
+                id: "tk-odaiba",
+                cidade: "Tóquio",
+                distrito: "Odaiba & Toyosu (Baía)",
+                curto: "Odaiba / TeamLab",
+                vibe: "Arte Digital Imersiva, Gundam em Tamanho Real & Baía",
+                corHex: "#0284c7", // Sky Blue
+                corBadge: "bg-sky-100 text-sky-800",
+                estacoes: "Toyosu Sta. / Daiba Sta. (Monotrilho Yurikamome)",
+                dicaLogistica: "Vá no primeiro vagão do monotrilho automático Yurikamome para ter a vista panorâmica da Rainbow Bridge.",
+                center: [35.6350, 139.7820],
+                zoom: 13,
+                polygon: [
+                    [35.652, 139.768], [35.652, 139.800], [35.620, 139.800], [35.620, 139.768]
+                ],
+                pontos: [
+                    { nome: "teamLab Planets TOKYO (Toyosu)", tipo: "Arte Imersiva", icone: "fa-wand-magic-sparkles", lat: 35.6491, lng: 139.7898, desc: "Museu digital onde você caminha descalço pela água e salas de luz.", query: "teamLab Planets TOKYO" },
+                    { nome: "Unicorn Gundam & DiverCity Plaza", tipo: "Cultura Pop", icone: "fa-robot", lat: 35.6247, lng: 139.7755, desc: "Gundam de 19,7m em tamanho real e loja Gundam Base.", query: "Unicorn Gundam Statue Odaiba" },
+                    { nome: "Orla de Odaiba & Estátua da Liberdade", tipo: "Vista", icone: "fa-camera", lat: 35.6279, lng: 139.7718, desc: "Vista linda da Rainbow Bridge e do skyline de Tóquio.", query: "Odaiba Statue of Liberty" }
+                ]
+            },
+
+            // ==================== OSAKA (3 DISTRITOS) ====================
+            {
+                id: "os-minami",
+                cidade: "Osaka",
+                distrito: "Minami (Namba, Dotonbori & Shinsekai)",
+                curto: "Namba / Dotonbori",
+                vibe: "Nossa Base em Osaka • Comida de Rua, Letreiros 3D & Geek",
+                corHex: "#dc2626", // Vermelho
+                corBadge: "bg-red-100 text-red-700",
+                estacoes: "Ebisucho Sta. / Dobutsuen-mae Sta. / Namba Sta.",
+                dicaLogistica: "Nosso hotel (Eslead Namba South I) fica ao lado da Torre Tsutenkaku (Shinsekai) e permite ir caminhando até Den Den Town e Dotonbori!",
+                center: [34.6590, 135.5040],
+                zoom: 14,
+                polygon: [
+                    [34.672, 135.495], [34.672, 135.512], [34.646, 135.512], [34.646, 135.495]
+                ],
+                pontos: [
+                    { nome: "Eslead Hotel Namba South I (Base)", tipo: "Hospedagem", icone: "fa-bed", lat: 34.6508, lng: 135.5050, desc: "Nossa hospedagem em Osaka, colada na estação Ebisucho e na Torre Tsutenkaku.", query: "Eslead Hotel Namba South I" },
+                    { nome: "Shinsekai & Torre Tsutenkaku", tipo: "Retrô/Comida", icone: "fa-tower-cell", lat: 34.6525, lng: 135.5063, desc: "Bairro retrô vizinho ao hotel, famoso pelos letreiros coloridos e Kushikatsu.", query: "Tsutenkaku Shinsekai" },
+                    { nome: "Den Den Town (Nipponbashi)", tipo: "Games/Eletrônicos", icone: "fa-gamepad", lat: 34.6595, lng: 135.5056, desc: "A 'Akihabara de Osaka' para retro-games, figures, Gundam e eletrônicos.", query: "Nipponbashi Denden Town" },
+                    { nome: "Dotonbori & Letreiro Glico Man", tipo: "Ícone/Gastronomia", icone: "fa-utensils", lat: 34.6687, lng: 135.5013, desc: "O canal mais famoso de Osaka, repleto de Takoyaki e Okonomiyaki.", query: "Dotonbori Glico Sign" },
+                    { nome: "Mercado Kuromon Ichiba", tipo: "Mercado", icone: "fa-fish", lat: 34.6654, lng: 135.5065, desc: "Mercado coberto tradicional com frutos do mar grelhados e Wagyu.", query: "Kuromon Market Osaka" }
+                ]
+            },
+            {
+                id: "os-kita",
+                cidade: "Osaka",
+                distrito: "Chuo (Castelo) & Kita (Umeda)",
+                curto: "Castelo / Umeda",
+                vibe: "História Samurai & Arranha-céus Futuristas",
+                corHex: "#2563eb", // Azul
+                corBadge: "bg-blue-100 text-blue-700",
+                estacoes: "Osakajokoen Sta. • Umeda / Osaka Sta. (Midosuji Line)",
+                dicaLogistica: "A linha vermelha Midosuji leva direto de Dobutsuen-mae/Namba até Umeda.",
+                center: [34.6950, 135.5100],
+                zoom: 13,
+                polygon: [
+                    [34.710, 135.485], [34.710, 135.535], [34.680, 135.535], [34.680, 135.485]
+                ],
+                pontos: [
+                    { nome: "Castelo de Osaka (Osaka-jo)", tipo: "Castelo", icone: "fa-chess-rook", lat: 34.6873, lng: 135.5262, desc: "Um dos castelos mais famosos do Japão, cercado por fossos e jardins.", query: "Osaka Castle" },
+                    { nome: "Umeda Sky Building", tipo: "Mirante", icone: "fa-building", lat: 34.7055, lng: 135.4896, desc: "Observatório do Jardim Flutuante com escada rolante panorâmica.", query: "Umeda Sky Building" }
+                ]
+            },
+            {
+                id: "os-baia",
+                cidade: "Osaka",
+                distrito: "Baía de Osaka (USJ & Kaiyukan)",
+                curto: "Universal / Baía",
+                vibe: "Super Nintendo World, Harry Potter & Aquário",
+                corHex: "#9333ea", // Roxo
+                corBadge: "bg-purple-100 text-purple-700",
+                estacoes: "Universal City Sta. • Osakako Sta.",
+                dicaLogistica: "Saia de Shin-Imamiya (perto do hotel) pela JR Loop Line até Nishikujo e conecte na linha da Universal (~20 min).",
+                center: [34.6600, 135.4320],
+                zoom: 13,
+                polygon: [
+                    [34.675, 135.418], [34.675, 135.446], [34.648, 135.446], [34.648, 135.418]
+                ],
+                pontos: [
+                    { nome: "Universal Studios Japan (USJ)", tipo: "Parque", icone: "fa-wand-sparkles", lat: 34.6654, lng: 135.4323, desc: "Super Nintendo World, Harry Potter e atrações principais.", query: "Universal Studios Japan" },
+                    { nome: "Aquário de Osaka (Kaiyukan)", tipo: "Família", icone: "fa-water", lat: 34.6545, lng: 135.4290, desc: "Um dos maiores aquários do mundo e roda-gigante Tempozan.", query: "Osaka Aquarium Kaiyukan" }
+                ]
+            },
+
+            // ==================== QUIOTO (2 DISTRITOS) ====================
+            {
+                id: "ky-leste",
+                cidade: "Quioto",
+                distrito: "Fushimi & Higashiyama (Gion)",
+                curto: "Fushimi / Gion",
+                vibe: "Portões Torii Vermelhos & Ruas Históricas de Madeira",
+                corHex: "#dc2626", // Vermelho
+                corBadge: "bg-red-100 text-red-700",
+                estacoes: "Inari Sta. (JR) / Fushimi-Inari Sta. (Keihan) • Gion-Shijo Sta.",
+                dicaLogistica: "A linha Keihan conecta Osaka direto a Fushimi Inari e depois a Gion/Kiyomizu-dera.",
+                center: [34.9850, 135.7750],
+                zoom: 13,
+                polygon: [
+                    [35.012, 135.762], [35.012, 135.790], [34.962, 135.790], [34.962, 135.762]
+                ],
+                pontos: [
+                    { nome: "Santuário Fushimi Inari Taisha", tipo: "Santuário", icone: "fa-torii-gate", lat: 34.9671, lng: 135.7727, desc: "Caminhada pelos milhares de portões Torii vermelhos na montanha.", query: "Fushimi Inari Taisha" },
+                    { nome: "Templo Kiyomizu-dera & Sannenzaka", tipo: "Templo UNESCO", icone: "fa-gopuram", lat: 34.9949, lng: 135.7850, desc: "Famoso templo de madeira e ladeiras históricas preservadas.", query: "Kiyomizu-dera Kyoto" },
+                    { nome: "Distrito de Gion & Hanamikoji", tipo: "Histórico", icone: "fa-lantern", lat: 35.0037, lng: 135.7756, desc: "Bairro tradicional de casas de chá e arquitetura clássica.", query: "Gion Kyoto" }
+                ]
+            },
+            {
+                id: "ky-oeste",
+                cidade: "Quioto",
+                distrito: "Arashiyama & Kinkaku-ji",
+                curto: "Arashiyama / Ouro",
+                vibe: "Floresta de Bambu & Pavilhão Dourado",
+                corHex: "#d97706", // Dourado/Âmbar
+                corBadge: "bg-amber-100 text-amber-800",
+                estacoes: "Saga-Arashiyama Sta. (JR)",
+                dicaLogistica: "Região oeste e norte de Quioto.",
+                center: [35.0280, 135.7000],
+                zoom: 12,
+                polygon: [
+                    [35.048, 135.660], [35.048, 135.738], [35.005, 135.738], [35.005, 135.660]
+                ],
+                pontos: [
+                    { nome: "Floresta de Bambu de Arashiyama", tipo: "Natureza", icone: "fa-leaf", lat: 35.0168, lng: 135.6713, desc: "Caminho icônico cercado por bambuzais gigantes e Ponte Togetsukyo.", query: "Arashiyama Bamboo Grove" },
+                    { nome: "Kinkaku-ji (Pavilhão Dourado)", tipo: "Templo UNESCO", icone: "fa-sun", lat: 35.0394, lng: 135.7292, desc: "Templo zen recoberto de folhas de ouro refletido no lago.", query: "Kinkaku-ji Kyoto" }
+                ]
+            }
+        ];
+
+        // -------------------------------------------------------------------------
+        // 2. LOGICA DO MAPA INTERATIVO (LEAFLET)
+        // -------------------------------------------------------------------------
+        let mapInstance = null;
+        let mapLayersGroup = null;
+        let currentMapCity = 'Tóquio';
+        let selectedDistrictId = 'todos';
+
+        function initInteractiveMap() {
+            if (mapInstance) return;
+
+            const cfg = cityConfigs[currentMapCity];
+            mapInstance = L.map('interactive-map', {
+                zoomControl: true,
+                attributionControl: false
+            }).setView(cfg.center, cfg.zoom);
+
+            // Tile Layer limpo e moderno (CartoDB Voyager)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 18
+            }).addTo(mapInstance);
+
+            mapLayersGroup = L.layerGroup().addTo(mapInstance);
+            drawMapForCity(currentMapCity);
+        }
+
+        function setMapCity(cityName) {
+            currentMapCity = cityName;
+            selectedDistrictId = 'todos';
+
+            // Atualiza estilo dos botões de cidade
+            document.querySelectorAll('.map-city-btn').forEach(btn => {
+                btn.className = "map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition";
+            });
+            const activeBtn = document.getElementById(`map-city-${cityName}`);
+            if (activeBtn) {
+                activeBtn.className = "map-city-btn bg-slate-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition";
+            }
+
+            if (mapInstance) {
+                const cfg = cityConfigs[cityName];
+                mapInstance.flyTo(cfg.center, cfg.zoom, { duration: 0.8 });
+                drawMapForCity(cityName);
+            }
+            renderMapDistrictPills();
+            renderPlacesList();
+        }
+
+        function resetCityZoom() {
+            selectedDistrictId = 'todos';
+            if (mapInstance && cityConfigs[currentMapCity]) {
+                const cfg = cityConfigs[currentMapCity];
+                mapInstance.flyTo(cfg.center, cfg.zoom, { duration: 0.6 });
+            }
+            renderMapDistrictPills();
+            renderPlacesList();
+        }
+
+        function focusDistrictOnMap(districtId) {
+            selectedDistrictId = districtId;
+            const dist = districtsData.find(d => d.id === districtId);
+            if (dist && mapInstance) {
+                mapInstance.flyTo(dist.center, dist.zoom, { duration: 0.7 });
+            }
+            renderMapDistrictPills();
+            renderPlacesList();
+        }
+
+        function drawMapForCity(cityName) {
+            if (!mapLayersGroup) return;
+            mapLayersGroup.clearLayers();
+
+            const cityDistricts = districtsData.filter(d => d.cidade === cityName);
+
+            cityDistricts.forEach(dist => {
+                // 1. Desenha o polígono colorido separando visualmente o distrito
+                const poly = L.polygon(dist.polygon, {
+                    color: dist.corHex,
+                    weight: 2,
+                    opacity: 0.85,
+                    dashArray: '5, 5',
+                    fillColor: dist.corHex,
+                    fillOpacity: 0.14
+                }).addTo(mapLayersGroup);
+
+                poly.on('click', () => {
+                    focusDistrictOnMap(dist.id);
+                });
+
+                // Rótulo central discreto do nome do distrito
+                poly.bindTooltip(dist.curto, {
+                    permanent: false,
+                    direction: 'center',
+                    className: 'district-label'
+                });
+
+                // 2. Desenha os pinos de cada local salvo dentro do distrito
+                dist.pontos.forEach(p => {
+                    const iconHtml = `
+                        <div class="custom-pin" style="background-color: ${dist.corHex}; width: 28px; height: 28px;">
+                            <i class="fa-solid ${p.icone || 'fa-location-dot'}"></i>
+                        </div>
+                    `;
+                    const customIcon = L.divIcon({
+                        html: iconHtml,
+                        className: '',
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14],
+                        popupAnchor: [0, -14]
+                    });
+
+                    const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.query)}&travelmode=transit`;
+                    const searchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.query)}`;
+
+                    const popupContent = `
+                        <div class="text-slate-800 max-w-[210px]">
+                            <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded text-white" style="background-color:${dist.corHex}">${dist.curto}</span>
+                            <h4 class="font-bold text-xs mt-1 leading-tight">${p.nome}</h4>
+                            <p class="text-[11px] text-slate-500 my-1 leading-snug">${p.desc}</p>
+                            <div class="flex gap-1.5 mt-2">
+                                <a href="${dirUrl}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg text-center flex items-center justify-center gap-1" style="color:white; text-decoration:none;">
+                                    <i class="fa-solid fa-diamond-turn-right"></i> Direções
+                                </a>
+                                <a href="${searchUrl}" target="_blank" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold py-1.5 px-2 rounded-lg text-center" style="text-decoration:none;">
+                                    Ver Pino
+                                </a>
+                            </div>
+                        </div>
+                    `;
+
+                    L.marker([p.lat, p.lng], { icon: customIcon })
+                        .bindPopup(popupContent)
+                        .addTo(mapLayersGroup);
+                });
+            });
+        }
+
+        function renderMapDistrictPills() {
+            const container = document.getElementById('map-district-pills');
+            if (!container) return;
+
+            const cityDistricts = districtsData.filter(d => d.cidade === currentMapCity);
+            let html = `
+                <button onclick="resetCityZoom()" class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition ${selectedDistrictId === 'todos' ? 'bg-slate-800 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
+                    Todos (${cityDistricts.length} Distritos)
+                </button>
+            `;
+
+            cityDistricts.forEach(d => {
+                const isSelected = selectedDistrictId === d.id;
+                const style = isSelected 
+                    ? `background-color: ${d.corHex}; color: white; border-color: ${d.corHex};` 
+                    : `background-color: white; color: #334155; border-color: #e2e8f0;`;
+                
+                html += `
+                    <button onclick="focusDistrictOnMap('${d.id}')" style="${style}" class="px-3 py-1.5 rounded-full text-[11px] font-bold border whitespace-nowrap flex items-center gap-1.5 transition shadow-sm">
+                        <span class="w-2 h-2 rounded-full" style="background-color: ${isSelected ? '#fff' : d.corHex}"></span>
+                        ${d.curto}
+                    </button>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderPlacesList() {
+            const container = document.getElementById('places-container');
+            const searchTerm = (document.getElementById('place-search')?.value || '').toLowerCase();
+            container.innerHTML = '';
+
+            // Filtra pela cidade selecionada (ou mostra todas se houver busca digitada)
+            let targetDistricts = searchTerm.length > 0 
+                ? districtsData 
+                : districtsData.filter(d => d.cidade === currentMapCity);
+
+            if (selectedDistrictId !== 'todos' && searchTerm.length === 0) {
+                targetDistricts = targetDistricts.filter(d => d.id === selectedDistrictId);
+            }
+
+            targetDistricts.forEach(dist => {
+                const matchingPoints = dist.pontos.filter(p => 
+                    p.nome.toLowerCase().includes(searchTerm) || 
+                    p.desc.toLowerCase().includes(searchTerm) || 
+                    p.tipo.toLowerCase().includes(searchTerm) ||
+                    dist.distrito.toLowerCase().includes(searchTerm)
+                );
+
+                if (matchingPoints.length === 0) return;
+
+                let itemsHTML = '';
+                matchingPoints.forEach(item => {
+                    const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.query)}&travelmode=transit`;
+                    const viewUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.query)}`;
+                    
+                    itemsHTML += `
+                        <div class="p-3 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/80 transition">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-start gap-2.5">
+                                    <button onclick="panToPin(${item.lat}, ${item.lng})" title="Destacar no mapa acima"
+                                            class="w-7 h-7 rounded-full text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm" style="background-color: ${dist.corHex}">
+                                        <i class="fa-solid ${item.icone || 'fa-location-dot'} text-xs"></i>
+                                    </button>
+                                    <div>
+                                        <div class="flex items-center flex-wrap gap-1.5">
+                                            <h4 class="text-xs font-bold text-slate-800">${item.nome}</h4>
+                                            <span class="text-[9px] bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-semibold">${item.tipo}</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">${item.desc}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Botões de Ação Rápida (Direções / Ver no Maps) -->
+                            <div class="flex items-center gap-2 mt-2.5 pt-2 border-t border-slate-200/60">
+                                <a href="${dirUrl}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition">
+                                    <i class="fa-solid fa-diamond-turn-right"></i> Obter Direções (Rota)
+                                </a>
+                                <a href="${viewUrl}" target="_blank" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-semibold py-1.5 px-3 rounded-lg flex items-center justify-center gap-1 transition">
+                                    <i class="fa-solid fa-location-dot text-red-500"></i> Abrir Maps
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl shadow-sm border-2 overflow-hidden" style="border-color: ${dist.corHex}30">
+                        <div class="px-4 py-2.5 flex justify-between items-center border-b border-slate-100" style="background-color: ${dist.corHex}12">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${dist.corHex}"></span>
+                                <div>
+                                    <h3 class="text-xs font-extrabold uppercase tracking-wide text-slate-800">${dist.distrito}</h3>
+                                    <p class="text-[10px] text-slate-500">${dist.estacoes}</p>
+                                </div>
+                            </div>
+                            <button onclick="focusDistrictOnMap('${dist.id}'); window.scrollTo({top: 0, behavior: 'smooth'});" 
+                                    class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0 shadow-sm">
+                                <i class="fa-solid fa-crosshairs mr-1"></i>Focar Mapa
+                            </button>
+                        </div>
+                        <div class="p-3 space-y-2.5">${itemsHTML}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function panToPin(lat, lng) {
+            if (mapInstance) {
+                mapInstance.flyTo([lat, lng], 16, { duration: 0.6 });
+                window.scrollTo({ top: 70, behavior: 'smooth' });
+            }
+        }
+
+        // -------------------------------------------------------------------------
+        // 3. DADOS DA TIMELINE (10/01 a 29/01/2027)
         // -------------------------------------------------------------------------
         const defaultTimelineData = [
             {
@@ -283,169 +837,146 @@
                 id: "dia-11", diaMes: "11", dataCompleta: "11/Jan/2027", diaSemana: "Segunda-feira",
                 cidade: "Voos", titulo: "Conexão em Nova York (JFK) ➔ Tóquio",
                 atividades: [
-                    { hora: "11:50", local: "Voo JL 7009 (JFK ➔ Haneda)", desc: "Embarque no voo rumo a Tóquio (cruza a Linha Internacional de Data).", mapQuery: "John F. Kennedy International Airport" }
+                    { hora: "11:50", local: "Voo JL 7009 (JFK ➔ Haneda)", desc: "Embarque rumo a Tóquio cruzando a Linha Internacional de Data.", mapQuery: "John F. Kennedy International Airport" }
                 ]
             },
             {
                 id: "dia-12", diaMes: "12", dataCompleta: "12/Jan/2027", diaSemana: "Terça-feira",
                 cidade: "Tóquio", titulo: "Desembarque em Haneda & Check-in em Kinshicho",
                 atividades: [
-                    { hora: "15:30", local: "Chegada no Aeroporto de Tóquio (Haneda - HND)", desc: "Imigração, retirada de malas, ativação de IC Cards (Suica/Pasmo) e internet.", mapQuery: "Haneda Airport" },
-                    { hora: "18:00", local: "Check-in em Kinshicho (Sumida City)", desc: "Acomodação na região de Kinshicho / Sumida.", mapQuery: "Kinshicho Station Tokyo" },
-                    { hora: "20:00", local: "Jantar Rápido & Konbini em Kinshicho", desc: "Primeira refeição perto da estação (Termina / Arcakit Kinshicho) e descanso do fuso.", mapQuery: "Arcakit Kinshicho" }
+                    { hora: "15:30", local: "Chegada no Aeroporto de Tóquio (Haneda - HND)", desc: "Imigração, retirada de malas e Suica/Pasmo.", mapQuery: "Haneda Airport" },
+                    { hora: "18:00", local: "Check-in em Kinshicho (Sumida City)", desc: "Acomodação na nossa base em Sumida.", mapQuery: "Kinshicho Station Tokyo" },
+                    { hora: "20:00", local: "Jantar Rápido em Kinshicho", desc: "Primeira refeição perto da estação e descanso.", mapQuery: "Arcakit Kinshicho" }
                 ]
             },
             {
                 id: "dia-13", diaMes: "13", dataCompleta: "13/Jan/2027", diaSemana: "Quarta-feira",
                 cidade: "Tóquio", titulo: "Sumida, Asakusa & Tokyo Skytree",
                 atividades: [
-                    { hora: "09:00", local: "Templo Senso-ji & Portão Kaminarimon", desc: "Visita ao templo mais antigo de Tóquio e caminhada pela rua Nakamise-dori.", mapQuery: "Senso-ji Asakusa Tokyo" },
-                    { hora: "12:30", local: "Almoço em Asakusa", desc: "Experimentar Tempura tradicional ou Melonpan recém-assado.", mapQuery: "Nakamise Shopping Street" },
-                    { hora: "15:00", local: "Tokyo Skytree & Solamachi (Sumida)", desc: "Subida ao observatório e visita ao Pokémon Center Skytree Town (pertinho de Kinshicho).", mapQuery: "Tokyo Skytree" },
-                    { hora: "19:00", local: "Retorno à base em Sumida City", desc: "Jantar no shopping Solamachi ou arredores de Kinshicho.", mapQuery: "Tokyo Solamachi" }
+                    { hora: "09:00", local: "Templo Senso-ji & Portão Kaminarimon", desc: "Templo histórico de Asakusa e rua Nakamise-dori.", mapQuery: "Senso-ji Asakusa Tokyo" },
+                    { hora: "15:00", local: "Tokyo Skytree & Solamachi (Sumida)", desc: "Subida ao mirante e visita ao Pokémon Center Skytree Town.", mapQuery: "Tokyo Skytree" }
                 ]
             },
             {
                 id: "dia-14", diaMes: "14", dataCompleta: "14/Jan/2027", diaSemana: "Quinta-feira",
                 cidade: "Tóquio", titulo: "Akihabara & Ochanomizu (Rua das Guitarras)",
                 atividades: [
-                    { hora: "09:30", local: "Ochanomizu Guitar Street", desc: "Acesso direto de Kinshicho pela linha JR Sobu! Visita às megastores Ishibashi, Kurosawa e BigBoss.", mapQuery: "Ochanomizu Station Tokyo" },
-                    { hora: "13:00", local: "Almoço em Kanda / Akihabara", desc: "Caminhada de 10 min de Ochanomizu até Akihabara.", mapQuery: "Akihabara Electric Town" },
-                    { hora: "14:30", local: "Yodobashi Camera Multimedia Akiba", desc: "9 andares de eletrônicos, áudio, interfaces, pedais e colecionáveis.", mapQuery: "Yodobashi Akiba" },
-                    { hora: "17:30", local: "Super Potato, Radio Kaikan & Arcades", desc: "Explorar lojas de retro-games e figures nas ruas de Chuo-dori.", mapQuery: "Super Potato Akihabara" }
+                    { hora: "09:30", local: "Ochanomizu Guitar Street", desc: "Lojas de guitarras e equipamentos musicais (Ishibashi, Kurosawa, BigBoss).", mapQuery: "Ochanomizu Station Tokyo" },
+                    { hora: "14:30", local: "Akihabara & Yodobashi Akiba", desc: "Megastore de 9 andares, Super Potato e Radio Kaikan.", mapQuery: "Yodobashi Akiba" }
                 ]
             },
             {
                 id: "dia-15", diaMes: "15", dataCompleta: "15/Jan/2027", diaSemana: "Sexta-feira",
                 cidade: "Tóquio", titulo: "Harajuku, Meiji Jingu & Shibuya",
                 atividades: [
-                    { hora: "09:00", local: "Santuário Meiji Jingu", desc: "Caminhada matinal pelos jardins e barris de saquê em Harajuku.", mapQuery: "Meiji Jingu Tokyo" },
-                    { hora: "11:30", local: "Takeshita Street & Omotesando", desc: "Lojas jovens, crepes de Harajuku e arquitetura de Omotesando.", mapQuery: "Takeshita Street Harajuku" },
-                    { hora: "14:30", local: "Shibuya PARCO (6º Andar)", desc: "Nintendo Tokyo, Pokémon Center Shibuya, Capcom Store e Jump Shop.", mapQuery: "Shibuya PARCO" },
-                    { hora: "17:00", local: "Shibuya Sky & Scramble Crossing", desc: "Pôr do sol no mirante Shibuya Sky, estátua do Hachiko e retorno direto a Kinshicho pela linha Hanzomon.", mapQuery: "Shibuya Scramble Crossing" }
+                    { hora: "09:00", local: "Santuário Meiji Jingu & Takeshita Street", desc: "Floresta sagrada de Harajuku e rua jovem.", mapQuery: "Meiji Jingu Tokyo" },
+                    { hora: "14:30", local: "Shibuya PARCO, Shibuya Sky & Hachiko", desc: "Nintendo Tokyo, Pokémon Center e cruzamento famoso.", mapQuery: "Shibuya PARCO" }
                 ]
             },
             {
                 id: "dia-16", diaMes: "16", dataCompleta: "16/Jan/2027", diaSemana: "Sábado",
                 cidade: "Tóquio", titulo: "Shinjuku: Mirante, Luzes Neon & Godzilla",
                 atividades: [
-                    { hora: "09:30", local: "Jardim Nacional Shinjuku Gyoen", desc: "Passeio tranquilo pelos jardins tradicionais japoneses.", mapQuery: "Shinjuku Gyoen National Garden" },
-                    { hora: "13:00", local: "Lojas de Shinjuku (BicCamera / Isetan)", desc: "Almoço e compras na região oeste/leste de Shinjuku.", mapQuery: "Shinjuku Station" },
-                    { hora: "16:30", local: "Tokyo Metropolitan Government Building", desc: "Mirante gratuito no 45º andar para ver Tóquio do alto.", mapQuery: "Tokyo Metropolitan Government Building" },
-                    { hora: "18:30", local: "Kabukicho, Godzilla Head & Omoide Yokocho", desc: "Gato 3D na estação, cabeça do Godzilla e jantar nos becos iluminados.", mapQuery: "Godzilla Head Shinjuku" }
+                    { hora: "10:00", local: "Shinjuku Gyoen & Lojas de Shinjuku", desc: "Jardins imperiais e comércio de Shinjuku.", mapQuery: "Shinjuku Gyoen National Garden" },
+                    { hora: "16:30", local: "Mirante do Governo, Godzilla Head & Omoide Yokocho", desc: "Vista gratuita no 45º andar e noite em Kabukicho.", mapQuery: "Godzilla Head Shinjuku" }
                 ]
             },
             {
                 id: "dia-17", diaMes: "17", dataCompleta: "17/Jan/2027", diaSemana: "Domingo",
                 cidade: "Tóquio", titulo: "Baía de Tóquio: TeamLab Planets & Odaiba",
                 atividades: [
-                    { hora: "10:00", local: "teamLab Planets TOKYO (Toyosu)", desc: "Arte digital imersiva (reservar horário pela manhã).", mapQuery: "teamLab Planets TOKYO" },
-                    { hora: "13:30", local: "DiverCity Tokyo Plaza & Unicorn Gundam", desc: "Almoço em Odaiba, estátua do Gundam em tamanho real e Gundam Base.", mapQuery: "Unicorn Gundam Statue Odaiba" },
-                    { hora: "17:00", local: "Orla de Odaiba & Rainbow Bridge", desc: "Vista noturna do skyline de Tóquio e réplica da Estátua da Liberdade.", mapQuery: "Odaiba Statue of Liberty" }
+                    { hora: "10:00", local: "teamLab Planets TOKYO (Toyosu)", desc: "Arte digital imersiva.", mapQuery: "teamLab Planets TOKYO" },
+                    { hora: "14:00", local: "DiverCity Plaza & Unicorn Gundam", desc: "Gundam em tamanho real e vista da Rainbow Bridge.", mapQuery: "Unicorn Gundam Statue Odaiba" }
                 ]
             },
             {
                 id: "dia-18", diaMes: "18", dataCompleta: "18/Jan/2027", diaSemana: "Segunda-feira",
                 cidade: "Tóquio", titulo: "Parque Ueno, Museus & Mercado Ameyoko",
                 atividades: [
-                    { hora: "09:30", local: "Parque Ueno & Santuário Toshogu", desc: "Passeio pelo parque, lagos e templos históricos.", mapQuery: "Ueno Park Tokyo" },
-                    { hora: "12:00", local: "Museu Nacional de Tóquio / Ciência", desc: "Imersão cultural ou visita ao Museu Nacional da Natureza e Ciência.", mapQuery: "Tokyo National Museum" },
-                    { hora: "15:30", local: "Mercado Ameyoko (Ameya-Yokocho)", desc: "Comércio vibrante sob os trilhos do trem, doces, tênis e street food.", mapQuery: "Ameyoko Shopping District" }
+                    { hora: "09:30", local: "Parque Ueno & Museu Nacional", desc: "Templos, lagos e acervo histórico japonês.", mapQuery: "Ueno Park Tokyo" },
+                    { hora: "15:00", local: "Mercado Ameyoko", desc: "Comércio de rua tradicional e gastronomia.", mapQuery: "Ameyoko Shopping District" }
                 ]
             },
             {
                 id: "dia-19", diaMes: "19", dataCompleta: "19/Jan/2027", diaSemana: "Terça-feira",
                 cidade: "Tóquio", titulo: "Ginza, Palácio Imperial & Tokyo Station",
                 atividades: [
-                    { hora: "09:30", local: "Jardins Orientais do Palácio Imperial", desc: "Muralhas históricas do Castelo Edo e jardins imperiais.", mapQuery: "Imperial Palace East Gardens" },
-                    { hora: "12:00", local: "Tokyo Station (Character Street & Ramen Street)", desc: "Almoço na famosa Ramen Street subterrânea e lojas oficiais de personagens.", mapQuery: "Tokyo Character Street" },
-                    { hora: "15:00", local: "Ginza (Uniqlo Flagship, Itoya & Sony Park)", desc: "Caminhada pela Chuo-dori, papelaria de 12 andares Itoya e lojas principais.", mapQuery: "Ginza Six" }
+                    { hora: "10:00", local: "Palácio Imperial & Tokyo Station", desc: "Jardins imperiais, Ramen Street e Character Street.", mapQuery: "Tokyo Character Street" },
+                    { hora: "15:00", local: "Ginza (Uniqlo 12 andares & Itoya)", desc: "Principal avenida comercial de Tóquio.", mapQuery: "Uniqlo Ginza" }
                 ]
             },
             {
                 id: "dia-20", diaMes: "20", dataCompleta: "20/Jan/2027", diaSemana: "Quarta-feira",
                 cidade: "Tóquio", titulo: "Ikebukuro (Sunshine City) & Nakano Broadway",
                 atividades: [
-                    { hora: "10:00", local: "Sunshine City (Ikebukuro)", desc: "Complexo com Pokémon Center Mega Tokyo, One Piece Store e Gashapon Department Store.", mapQuery: "Sunshine City Ikebukuro" },
-                    { hora: "15:00", local: "Nakano Broadway", desc: "Acesso direto de Kinshicho pela linha JR Chuo-Sobu! Galeria famosa por colecionáveis raros, relógios e Mandarake.", mapQuery: "Nakano Broadway" }
+                    { hora: "10:00", local: "Sunshine City (Ikebukuro)", desc: "Pokémon Center Mega Tokyo e Gashapon Store.", mapQuery: "Sunshine City Ikebukuro" },
+                    { hora: "15:00", local: "Nakano Broadway", desc: "Shopping tradicional de colecionáveis e Mandarake.", mapQuery: "Nakano Broadway" }
                 ]
             },
             {
                 id: "dia-21", diaMes: "21", dataCompleta: "21/Jan/2027", diaSemana: "Quinta-feira",
-                cidade: "Tóquio", titulo: "Bate-volta (Monte Fuji / Kawaguchiko, Kamakura ou Yokohama)",
+                cidade: "Tóquio", titulo: "Bate-volta (Monte Fuji / Kamakura / Yokohama)",
                 atividades: [
-                    { hora: "08:00", local: "Saída Matinal p/ Bate-volta", desc: "Dia ideal para ver o Monte Fuji (céu limpo de inverno em janeiro) ou visitar o Grande Buda de Kamakura / Chinatown de Yokohama.", mapQuery: "Kawaguchiko Station" },
-                    { hora: "18:30", local: "Retorno para Tóquio (Sumida)", desc: "Chegada à noite e jantar em Kinshicho.", mapQuery: "Kinshicho Station" }
+                    { hora: "08:00", local: "Saída p/ Bate-volta de Inverno", desc: "Dia de céu limpo para região do Monte Fuji ou Kamakura.", mapQuery: "Kawaguchiko Station" }
                 ]
             },
             {
                 id: "dia-22", diaMes: "22", dataCompleta: "22/Jan/2027", diaSemana: "Sexta-feira",
-                cidade: "Tóquio", titulo: "Roppongi / Torre de Tóquio & Últimas Compras",
+                cidade: "Tóquio", titulo: "Torre de Tóquio & Despedida da Capital",
                 atividades: [
-                    { hora: "09:30", local: "Despacho de Malas (Takkyubin) & Check-out Sumida", desc: "Organização de bagagens para a segunda etapa da viagem.", mapQuery: "Sumida City Tokyo" },
-                    { hora: "13:00", local: "Torre de Tóquio & Templo Zojo-ji", desc: "Vista clássica da Torre de Tóquio vermelha e branca ao fundo do templo.", mapQuery: "Zojo-ji Temple Tokyo" },
-                    { hora: "16:30", local: "Revisitar Bairro Favorito em Tóquio", desc: "Tarde livre para compras pendentes (Akihabara, Shibuya ou Ochanomizu).", mapQuery: "Tokyo Station" }
+                    { hora: "10:00", local: "Torre de Tóquio & Templo Zojo-ji", desc: "Passeio clássico e envio de malas (Takkyubin).", mapQuery: "Tokyo Tower" }
                 ]
             },
             {
                 id: "dia-23", diaMes: "23", dataCompleta: "23/Jan/2027", diaSemana: "Sábado",
-                cidade: "Tóquio", titulo: "Transição / Deslocamento Rumo a Kansai",
+                cidade: "Tóquio", titulo: "Transição Rumo a Kansai",
                 atividades: [
-                    { hora: "10:00", local: "Manhã Livre / Deslocamento", desc: "Dia de transição entre a região de Kanto (Tóquio) e Kansai (Osaka/Quioto).", mapQuery: "Tokyo Station" },
-                    { hora: "15:00", local: "Passeio Leve & Gastronomia", desc: "Tarde dedicada ao trajeto panorâmico ou parada estratégica no caminho.", mapQuery: "Shin-Osaka Station" }
+                    { hora: "10:00", local: "Deslocamento Kanto ➔ Kansai", desc: "Viagem no Shinkansen rumo à região de Osaka/Quioto.", mapQuery: "Tokyo Station" }
                 ]
             },
             {
                 id: "dia-24", diaMes: "24", dataCompleta: "24/Jan/2027", diaSemana: "Domingo",
-                cidade: "Osaka", titulo: "Chegada em Osaka (Namba) & Dotonbori",
+                cidade: "Osaka", titulo: "Check-in em Namba South, Shinsekai & Dotonbori",
                 atividades: [
-                    { hora: "14:00", local: "Check-in no Eslead Hotel Namba South I", desc: "Acomodação na região sul de Namba / Shinsekai.", mapQuery: "Eslead Hotel Namba South I" },
-                    { hora: "16:00", local: "Shinsekai & Torre Tsutenkaku", desc: "Explorar o bairro retrô vizinho ao hotel e provar Kushikatsu.", mapQuery: "Tsutenkaku Shinsekai" },
-                    { hora: "18:30", local: "Dotonbori & Shinsaibashi", desc: "Letreiro do Glico Man, Takoyaki quentinho e luzes do canal de Dotonbori.", mapQuery: "Dotonbori Glico Sign" }
+                    { hora: "14:00", local: "Check-in no Eslead Hotel Namba South I", desc: "Acomodação ao lado da Torre Tsutenkaku.", mapQuery: "Eslead Hotel Namba South I" },
+                    { hora: "18:00", local: "Dotonbori & Letreiro Glico Man", desc: "Noite gastronômica no canal de Dotonbori.", mapQuery: "Dotonbori Glico Sign" }
                 ]
             },
             {
                 id: "dia-25", diaMes: "25", dataCompleta: "25/Jan/2027", diaSemana: "Segunda-feira",
                 cidade: "Osaka", titulo: "Castelo de Osaka, Kuromon, Den Den Town & Umeda",
                 atividades: [
-                    { hora: "09:00", local: "Castelo de Osaka (Osaka-jo)", desc: "Passeio pelos jardins, muralhas gigantes e torre principal.", mapQuery: "Osaka Castle" },
-                    { hora: "12:30", local: "Mercado Kuromon Ichiba", desc: "Almoço degustando frutos do mar grelhados, espetinhos de Wagyu e doces.", mapQuery: "Kuromon Market Osaka" },
-                    { hora: "14:30", local: "Den Den Town (Nipponbashi)", desc: "Caminhada pela avenida geek de Osaka (Super Potato Namba, Joshin Super Kids Land).", mapQuery: "Nipponbashi Denden Town" },
-                    { hora: "17:30", local: "Umeda Sky Building", desc: "Pôr do sol e vista noturna no Observatório do Jardim Flutuante.", mapQuery: "Umeda Sky Building" }
+                    { hora: "09:00", local: "Castelo de Osaka & Mercado Kuromon", desc: "Manhã histórica e almoço no mercado.", mapQuery: "Osaka Castle" },
+                    { hora: "14:30", local: "Den Den Town & Umeda Sky Building", desc: "Compras geek em Nipponbashi e pôr do sol em Umeda.", mapQuery: "Nipponbashi Denden Town" }
                 ]
             },
             {
                 id: "dia-26", diaMes: "26", dataCompleta: "26/Jan/2027", diaSemana: "Terça-feira",
                 cidade: "Osaka", titulo: "Universal Studios Japan (USJ)",
                 atividades: [
-                    { hora: "08:00", local: "Universal Studios Japan", desc: "Dia inteiro no parque: Super Nintendo World (Mario Kart / Donkey Kong), Harry Potter e atrações.", mapQuery: "Universal Studios Japan" },
-                    { hora: "20:00", local: "Universal CityWalk & Retorno a Namba", desc: "Jantar na saída do parque e trem de volta para o hotel.", mapQuery: "Universal CityWalk Osaka" }
+                    { hora: "08:00", local: "Universal Studios Japan", desc: "Super Nintendo World, Harry Potter e atrações.", mapQuery: "Universal Studios Japan" }
                 ]
             },
             {
                 id: "dia-27", diaMes: "27", dataCompleta: "27/Jan/2027", diaSemana: "Quarta-feira",
-                cidade: "Osaka", titulo: "Bate-volta: Quioto Clássica (Fushimi Inari & Gion)",
+                cidade: "Osaka", titulo: "Bate-volta: Quioto (Fushimi Inari, Kiyomizu & Gion)",
                 atividades: [
-                    { hora: "08:00", local: "Santuário Fushimi Inari Taisha (Quioto)", desc: "45 min saindo de Osaka. Caminhada pelos milhares de portões Torii vermelhos.", mapQuery: "Fushimi Inari Taisha" },
-                    { hora: "11:30", local: "Templo Kiyomizu-dera & Ladeiras Históricas", desc: "Visita ao templo de madeira e descida por Sannenzaka e Ninenzaka.", mapQuery: "Kiyomizu-dera Kyoto" },
-                    { hora: "15:00", local: "Gion & Mercado Nishiki", desc: "Passeio pelo bairro tradicional de Gion e centro de Quioto.", mapQuery: "Gion Kyoto" },
-                    { hora: "19:00", local: "Jantar de Despedida em Namba / Dotonbori", desc: "Última noite em Osaka (Okonomiyaki ou Yakiniku).", mapQuery: "Namba Osaka" }
+                    { hora: "08:00", local: "Fushimi Inari Taisha & Kiyomizu-dera", desc: "Portões Torii vermelhos, ladeiras históricas e Gion.", mapQuery: "Fushimi Inari Taisha" }
                 ]
             },
             {
                 id: "dia-28", diaMes: "28", dataCompleta: "28/Jan/2027", diaSemana: "Quinta-feira",
-                cidade: "Voos", titulo: "Retorno: Osaka ➔ Tóquio (Haneda) ➔ EUA ➔ Brasil",
+                cidade: "Voos", titulo: "Retorno: Haneda (08:25) ➔ Dallas (22:20) ➔ GRU",
                 atividades: [
-                    { hora: "Manhã", local: "Check-out em Osaka & Conexão p/ Haneda (HND)", desc: "Deslocamento matinal para embarque internacional em Tóquio Haneda.", mapQuery: "Haneda Airport Terminal 3" },
-                    { hora: "08:25", local: "Voo JL 7014 (Tóquio Haneda ➔ Dallas DFW)", desc: "Embarque de retorno cruzando o Pacífico (chegada no mesmo dia 28/01 devido ao fuso).", mapQuery: "Dallas Fort Worth International Airport" },
-                    { hora: "22:20", local: "Voo JL 7204 (Dallas DFW ➔ São Paulo GRU)", desc: "Embarque no trecho final noturno rumo ao Brasil.", mapQuery: "Aeroporto Internacional de Guarulhos" }
+                    { hora: "08:25", local: "Voo JL 7014 (Haneda ➔ Dallas DFW)", desc: "Retorno internacional.", mapQuery: "Haneda Airport Terminal 3" },
+                    { hora: "22:20", local: "Voo JL 7204 (Dallas DFW ➔ Guarulhos)", desc: "Voo noturno rumo ao Brasil.", mapQuery: "Dallas Fort Worth International Airport" }
                 ]
             },
             {
                 id: "dia-29", diaMes: "29", dataCompleta: "29/Jan/2027", diaSemana: "Sexta-feira",
                 cidade: "Voos", titulo: "Chegada ao Brasil (GRU ➔ Jaguaruna)",
                 atividades: [
-                    { hora: "Manhã/Tarde", local: "Desembarque em Guarulhos & Voo p/ Jaguaruna", desc: "Alfândega, conexão nacional e chegada em casa!", mapQuery: "Aeroporto de Jaguaruna" }
+                    { hora: "Manhã/Tarde", local: "Desembarque em Guarulhos & Conexão p/ JJG", desc: "Chegada em casa!", mapQuery: "Aeroporto de Jaguaruna" }
                 ]
             }
         ];
@@ -453,231 +984,7 @@
         let timelineData = [...defaultTimelineData];
 
         // -------------------------------------------------------------------------
-        // 2. DADOS DOS DISTRITOS / REGIÕES
-        // -------------------------------------------------------------------------
-        const districtsData = [
-            {
-                cidade: "Tóquio",
-                distrito: "Sumida (Kinshicho, Asakusa & Skytree)",
-                vibe: "Nossa Base em Tóquio • Tradição & Mirante",
-                corBadge: "bg-red-100 text-red-700",
-                estacoes: "Kinshicho Sta. (JR Sobu / Hanzomon) • Asakusa Sta. • Oshiage Sta.",
-                dicaLogistica: "Sua hospedagem em Sumida/Kinshicho fica colada na Tokyo Skytree (1 estação pela linha Hanzomon) e tem shoppings excelentes ao redor da estação (Arcakit, Termina e Parco).",
-                pontos: [
-                    { nome: "Estação Kinshicho & Arredores (Base)", tipo: "Hospedagem", desc: "Shoppings Arcakit (Daiso gigante), Parco, Yodobashi Kinshicho e Parque Kinshi.", query: "Kinshicho Station Tokyo" },
-                    { nome: "Tokyo Skytree & Solamachi", tipo: "Mirante/Compras", desc: "Torre de 634m com aquário e Pokémon Center na base.", query: "Tokyo Skytree" },
-                    { nome: "Templo Senso-ji & Kaminarimon", tipo: "Templo", desc: "O templo mais famoso de Tóquio e a rua comercial Nakamise-dori.", query: "Senso-ji Asakusa" }
-                ]
-            },
-            {
-                cidade: "Tóquio",
-                distrito: "Akihabara & Ochanomizu",
-                vibe: "Eletrônicos, Games & Rua das Guitarras",
-                corBadge: "bg-red-100 text-red-700",
-                estacoes: "Akihabara Sta. / Ochanomizu Sta. (Apenas 6 a 8 min direto de Kinshicho pela linha JR Sobu!)",
-                dicaLogistica: "De Kinshicho, pegue o trem amarelo (JR Chuo-Sobu Local): ele para direto em Akihabara (3 estações) e em Ochanomizu (4 estações) sem precisar fazer baldeação!",
-                pontos: [
-                    { nome: "Ochanomizu Guitar Street", tipo: "Música", desc: "Dezenas de lojas de guitarras, pedais e amplificadores saindo da estação Ochanomizu.", query: "Ochanomizu Guitar Street Tokyo" },
-                    { nome: "Yodobashi Camera Multimedia Akiba", tipo: "Eletrônicos", desc: "9 andares com tudo de tecnologia, áudio, ferramentas e brinquedos.", query: "Yodobashi Akiba" },
-                    { nome: "Super Potato & Radio Kaikan", tipo: "Games/Anime", desc: "Clássicos de retro-games e prédios inteiros de action figures.", query: "Super Potato Akihabara" }
-                ]
-            },
-            {
-                cidade: "Tóquio",
-                distrito: "Shibuya & Harajuku",
-                vibe: "Cruzamento Famoso, Nintendo & Meiji Jingu",
-                corBadge: "bg-red-100 text-red-700",
-                estacoes: "Shibuya Sta. (Linha Hanzomon - Direta de Kinshicho sem baldeação!)",
-                dicaLogistica: "A linha roxa (Tokyo Metro Hanzomon) leva você de Kinshicho direto para Shibuya sem trocar de trem.",
-                pontos: [
-                    { nome: "Shibuya Scramble Crossing & Hachiko", tipo: "Ícone", desc: "Cruzamento famoso e estátua do Hachiko.", query: "Shibuya Scramble Crossing" },
-                    { nome: "Shibuya PARCO (Nintendo & Pokémon)", tipo: "Games", desc: "6º andar dedicado a Nintendo Tokyo, Pokémon Center e Capcom Store.", query: "Shibuya PARCO" },
-                    { nome: "Shibuya Sky", tipo: "Mirante", desc: "Observatório 360º a céu aberto no topo do Shibuya Scramble Square.", query: "Shibuya Sky" },
-                    { nome: "Santuário Meiji Jingu & Takeshita Street", tipo: "Tradição/Jovem", desc: "Floresta sagrada de Harajuku ao lado da rua mais colorida de Tóquio.", query: "Meiji Jingu Tokyo" }
-                ]
-            },
-            {
-                cidade: "Tóquio",
-                distrito: "Shinjuku & Nakano",
-                vibe: "Arranha-céus, Godzilla & Colecionáveis",
-                corBadge: "bg-red-100 text-red-700",
-                estacoes: "Shinjuku Sta. / Nakano Sta. (Linha JR Chuo-Sobu direta de Kinshicho)",
-                dicaLogistica: "A mesma linha amarela JR Sobu que passa em Kinshicho atravessa toda Tóquio até Shinjuku e Nakano.",
-                pontos: [
-                    { nome: "Godzilla Head & Kabukicho", tipo: "Ícone", desc: "Cabeça do Godzilla no Hotel Gracery e letreiros luminosos.", query: "Godzilla Head Shinjuku" },
-                    { nome: "Tokyo Metropolitan Government Building", tipo: "Mirante Gratuito", desc: "Vista panorâmica gratuita no 45º andar.", query: "Tokyo Metropolitan Government Building" },
-                    { nome: "Omoide Yokocho", tipo: "Gastronomia", desc: "Vielas históricas de yakitori e ramen ao lado da estação.", query: "Omoide Yokocho Shinjuku" },
-                    { nome: "Nakano Broadway", tipo: "Geek/Retrô", desc: "Shopping tradicional repleto de lojas Mandarake e itens raros.", query: "Nakano Broadway" }
-                ]
-            },
-            {
-                cidade: "Tóquio",
-                distrito: "Odaiba & Toyosu (Baía de Tóquio)",
-                vibe: "Futurismo, Arte Imersiva & Gundam",
-                corBadge: "bg-red-100 text-red-700",
-                estacoes: "Toyosu Sta. / Daiba Sta. (Monotrilho Yurikamome)",
-                dicaLogistica: "Combine o teamLab Planets pela manhã com o shopping DiverCity (Gundam) à tarde.",
-                pontos: [
-                    { nome: "teamLab Planets TOKYO", tipo: "Arte Digital", desc: "Experiência sensorial imersiva na água e luz.", query: "teamLab Planets TOKYO" },
-                    { nome: "Unicorn Gundam (DiverCity)", tipo: "Cultura Pop", desc: "Robô gigante em tamanho real (19,7m) e loja Gundam Base.", query: "Unicorn Gundam Statue Odaiba" }
-                ]
-            },
-            {
-                cidade: "Osaka",
-                distrito: "Minami (Namba, Dotonbori, Nipponbashi & Shinsekai)",
-                vibe: "Nossa Base em Osaka • Comida de Rua & Geek",
-                corBadge: "bg-blue-100 text-blue-700",
-                estacoes: "Ebisucho Sta. / Dobutsuen-mae Sta. / Namba Sta.",
-                dicaLogistica: "O Eslead Hotel Namba South I fica colado na Torre Tsutenkaku (Shinsekai) e a uma curta caminhada de Den Den Town e Dotonbori!",
-                pontos: [
-                    { nome: "Eslead Hotel Namba South I (Base)", tipo: "Hospedagem", desc: "Nossa base em Osaka, excelente acesso ao metrô e a Shinsekai.", query: "Eslead Hotel Namba South I" },
-                    { nome: "Shinsekai & Torre Tsutenkaku", tipo: "Retrô/Comida", desc: "Vizinho ao hotel! Bairro colorido famoso pelo Kushikatsu.", query: "Tsutenkaku Shinsekai" },
-                    { nome: "Den Den Town (Nipponbashi)", tipo: "Games/Hardware", desc: "Rua dos eletrônicos, games e colecionáveis que liga Shinsekai a Namba.", query: "Nipponbashi Denden Town" },
-                    { nome: "Dotonbori & Letreiro Glico Man", tipo: "Ícone/Gastronomia", desc: "O coração noturno de Osaka com Takoyaki e Okonomiyaki.", query: "Dotonbori Glico Sign" },
-                    { nome: "Mercado Kuromon Ichiba", tipo: "Gastronomia", desc: "Mercado tradicional de frutos do mar, carnes nobres e frutas.", query: "Kuromon Market Osaka" }
-                ]
-            },
-            {
-                cidade: "Osaka",
-                distrito: "Chuo (Castelo de Osaka) & Umeda",
-                vibe: "História Samurai & Arranha-céus",
-                corBadge: "bg-blue-100 text-blue-700",
-                estacoes: "Osakajokoen Sta. / Tanimachi 4-chome • Umeda Sta.",
-                dicaLogistica: "Pegue a linha Midosuji (vermelha) perto do hotel para ir direto a Umeda e Shin-Osaka.",
-                pontos: [
-                    { nome: "Castelo de Osaka", tipo: "História", desc: "Imponente castelo cercado por muralhas de pedra e parque.", query: "Osaka Castle" },
-                    { nome: "Umeda Sky Building", tipo: "Mirante", desc: "Observatório panorâmico no topo de duas torres interligadas.", query: "Umeda Sky Building" }
-                ]
-            },
-            {
-                cidade: "Osaka",
-                distrito: "Baía de Osaka (Universal Studios)",
-                vibe: "Super Nintendo World & Parques",
-                corBadge: "bg-blue-100 text-blue-700",
-                estacoes: "Universal City Sta. (JR Yumesaki Line)",
-                dicaLogistica: "Saia de Shin-Imamiya (pertinho do hotel em Namba South) pela linha JR Loop até Nishikujo e troque para a linha da Universal (apenas ~20 min no total!).",
-                pontos: [
-                    { nome: "Universal Studios Japan (USJ)", tipo: "Parque", desc: "Super Nintendo World, Harry Potter e atrações.", query: "Universal Studios Japan" },
-                    { nome: "Aquário Kaiyukan", tipo: "Família", desc: "Um dos maiores aquários do mundo na baía de Osaka.", query: "Osaka Aquarium Kaiyukan" }
-                ]
-            },
-            {
-                cidade: "Quioto",
-                distrito: "Fushimi & Higashiyama (Gion)",
-                vibe: "Portões Torii Vermelhos & Templos Históricos",
-                corBadge: "bg-amber-100 text-amber-800",
-                estacoes: "Inari Sta. / Fushimi-Inari Sta. • Gion-Shijo Sta.",
-                dicaLogistica: "Excelente bate-volta saindo de Osaka. Comece cedo em Fushimi Inari e suba para Kiyomizu-dera e Gion.",
-                pontos: [
-                    { nome: "Fushimi Inari Taisha", tipo: "Santuário", desc: "Milhares de portões Torii vermelhos na montanha Inari.", query: "Fushimi Inari Taisha" },
-                    { nome: "Templo Kiyomizu-dera & Sannenzaka", tipo: "Templo UNESCO", desc: "Varanda histórica de madeira e ladeiras tradicionais de Quioto.", query: "Kiyomizu-dera Kyoto" }
-                ]
-            },
-            {
-                cidade: "Quioto",
-                distrito: "Arashiyama & Kinkaku-ji",
-                vibe: "Floresta de Bambu & Pavilhão Dourado",
-                corBadge: "bg-amber-100 text-amber-800",
-                estacoes: "Saga-Arashiyama Sta.",
-                dicaLogistica: "Região oeste e norte de Quioto.",
-                pontos: [
-                    { nome: "Floresta de Bambu de Arashiyama", tipo: "Natureza", desc: "Trilha famosa entre bambuzais gigantes.", query: "Arashiyama Bamboo Grove" },
-                    { nome: "Kinkaku-ji (Pavilhão Dourado)", tipo: "Templo UNESCO", desc: "Templo coberto de folhas de ouro refletido no lago.", query: "Kinkaku-ji Kyoto" }
-                ]
-            }
-        ];
-
-        // -------------------------------------------------------------------------
-        // 3. MOTOR DE LEITURA MATRICIAL (LINHA 1: DIA SEM | LINHA 2: DIA MÊS | COL B: HORA)
-        // -------------------------------------------------------------------------
-        function parseMatrixSheetToTimeline(rows2D) {
-            if (!rows2D || rows2D.length < 3) return false;
-
-            const rowWeekdays = rows2D[0]; // Linha 1 (A): Dias da semana
-            const rowMonthDays = rows2D[1]; // Linha 2 (B): Dias do mês (Janeiro 2027)
-            const maxCols = Math.max(rowWeekdays.length, rowMonthDays.length);
-
-            const diasMap = {
-                10: "Domingo", 11: "Segunda-feira", 12: "Terça-feira", 13: "Quarta-feira",
-                14: "Quinta-feira", 15: "Sexta-feira", 16: "Sábado", 17: "Domingo",
-                18: "Segunda-feira", 19: "Terça-feira", 20: "Quarta-feira", 21: "Quinta-feira",
-                22: "Sexta-feira", 23: "Sábado", 24: "Domingo", 25: "Segunda-feira",
-                26: "Terça-feira", 27: "Quarta-feira", 28: "Quinta-feira", 29: "Sexta-feira"
-            };
-
-            const newTimeline = [];
-
-            // Percorre as colunas de dias (a partir da coluna C -> índice 2, ou caso comece na col B/C)
-            for (let c = 2; c < maxCols; c++) {
-                let rawDay = (rowMonthDays[c] || '').toString().trim();
-                let rawWeekday = (rowWeekdays[c] || '').toString().trim();
-
-                if (!rawDay && !rawWeekday) continue;
-
-                // Extrai número do dia (ex: "12", "12/01", "12/jan" -> 12)
-                const dayMatch = rawDay.match(/\d+/);
-                const dayNum = dayMatch ? parseInt(dayMatch[0], 10) : null;
-
-                const dataFormatada = dayNum ? `${String(dayNum).padStart(2, '0')}/Jan/2027` : `${rawDay} Jan/2027`;
-                const diaSemanaFinal = rawWeekday || (dayNum && diasMap[dayNum]) || 'Janeiro 2027';
-
-                // Define cidade automaticamente com base no calendário da viagem (12-23 Tóquio, 24-27 Osaka, 10-11 e 28-29 Voos)
-                let cidadeAuto = "Tóquio";
-                if (dayNum) {
-                    if (dayNum <= 11 || dayNum >= 28) cidadeAuto = "Voos";
-                    else if (dayNum >= 24 && dayNum <= 27) cidadeAuto = "Osaka";
-                }
-
-                const atividadesDoDia = [];
-
-                // Percorre as linhas de horários (a partir da Linha 3 -> índice 2)
-                for (let r = 2; r < rows2D.length; r++) {
-                    const row = rows2D[r];
-                    if (!row) continue;
-
-                    // Coluna B (índice 1) tem as horas aproximadas; fallback para Coluna A (índice 0) se B estiver vazio
-                    const horaAprox = (row[1] || row[0] || '').toString().trim();
-                    const celulaEvento = (row[c] || '').toString().trim();
-
-                    if (celulaEvento !== '') {
-                        // Se a célula tiver mais de uma linha ou separador, separa título e detalhe
-                        const partes = celulaEvento.split(/\n| - /);
-                        const tituloLocal = partes[0].trim();
-                        const detalheLocal = partes.slice(1).join(' • ').trim() || `Horário aproximado: ${horaAprox || 'No dia'}`;
-
-                        atividadesDoDia.push({
-                            hora: horaAprox || '--:--',
-                            local: tituloLocal,
-                            desc: detalheLocal,
-                            mapQuery: `${tituloLocal} ${cidadeAuto === 'Voos' ? '' : cidadeAuto} Japan`
-                        });
-                    }
-                }
-
-                if (atividadesDoDia.length > 0) {
-                    newTimeline.push({
-                        id: `dia-${dayNum || c}`,
-                        diaMes: dayNum ? String(dayNum).padStart(2, '0') : String(c - 1),
-                        dataCompleta: dataFormatada,
-                        diaSemana: diaSemanaFinal,
-                        cidade: cidadeAuto,
-                        titulo: atividadesDoDia[0].local,
-                        atividades: atividadesDoDia
-                    });
-                }
-            }
-
-            if (newTimeline.length > 0) {
-                timelineData = newTimeline;
-                renderDayJumper();
-                renderTimeline('todos');
-                return true;
-            }
-            return false;
-        }
-
-        // -------------------------------------------------------------------------
-        // 4. RENDERIZAÇÃO DA INTERFACE
+        // 4. RENDERIZAÇÃO DA TIMELINE E ABA DISTRITOS
         // -------------------------------------------------------------------------
         function renderDayJumper() {
             const jumper = document.getElementById('day-jumper');
@@ -718,7 +1025,7 @@
                 
                 let atividadesHTML = '';
                 diaObj.atividades.forEach(ativ => {
-                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ativ.mapQuery || ativ.local)}`;
+                    const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(ativ.mapQuery || ativ.local)}&travelmode=transit`;
                     atividadesHTML += `
                         <div class="relative pl-4 pb-3 border-l-2 border-slate-200 last:border-l-0 last:pb-0">
                             <div class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-red-500"></div>
@@ -730,9 +1037,9 @@
                                     <h4 class="text-sm font-bold text-slate-800 leading-snug">${ativ.local}</h4>
                                     <p class="text-xs text-slate-500 mt-0.5">${ativ.desc}</p>
                                 </div>
-                                <a href="${mapsUrl}" target="_blank" title="Abrir no Maps"
-                                   class="text-slate-400 hover:text-red-600 p-1.5 bg-slate-50 rounded-lg border border-slate-200 shrink-0">
-                                    <i class="fa-solid fa-location-dot text-xs"></i>
+                                <a href="${dirUrl}" target="_blank" title="Obter Direções"
+                                   class="text-emerald-700 hover:bg-emerald-100 p-2 bg-emerald-50 rounded-lg border border-emerald-200 shrink-0">
+                                    <i class="fa-solid fa-diamond-turn-right text-xs"></i>
                                 </a>
                             </div>
                         </div>
@@ -783,13 +1090,11 @@
                 : districtsData.filter(d => d.cidade.toLowerCase().includes(filterCity.toLowerCase()));
 
             filtered.forEach(dist => {
-                const regionMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dist.distrito + ' ' + dist.cidade)}`;
-                
                 let pontosHTML = '';
                 dist.pontos.forEach(p => {
-                    const pUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.query)}`;
+                    const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.query)}&travelmode=transit`;
                     pontosHTML += `
-                        <a href="${pUrl}" target="_blank" class="flex items-start justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 transition group">
+                        <a href="${dirUrl}" target="_blank" class="flex items-start justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-100 transition group">
                             <div class="pr-2">
                                 <div class="flex items-center gap-1.5">
                                     <span class="text-xs font-bold text-slate-800 group-hover:text-red-600 transition">${p.nome}</span>
@@ -797,8 +1102,8 @@
                                 </div>
                                 <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">${p.desc}</p>
                             </div>
-                            <span class="text-slate-400 group-hover:text-red-600 p-1 shrink-0">
-                                <i class="fa-solid fa-diamond-turn-right text-xs"></i>
+                            <span class="text-emerald-600 bg-emerald-50 px-2 py-1 rounded text-[10px] font-bold shrink-0 flex items-center gap-1">
+                                <i class="fa-solid fa-diamond-turn-right"></i> Rota
                             </span>
                         </a>
                     `;
@@ -809,13 +1114,13 @@
                         <div class="p-4 border-b border-slate-100">
                             <div class="flex justify-between items-start gap-2">
                                 <div>
-                                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${dist.corBadge}">${dist.cidade}</span>
+                                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded text-white" style="background-color: ${dist.corHex}">${dist.cidade}</span>
                                     <h3 class="text-base font-bold text-slate-800 mt-1">${dist.distrito}</h3>
                                     <p class="text-xs text-slate-500 font-medium">${dist.vibe}</p>
                                 </div>
-                                <a href="${regionMapUrl}" target="_blank" class="text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0">
-                                    <i class="fa-solid fa-map"></i> Mapa
-                                </a>
+                                <button onclick="openDistrictInInteractiveMap('${dist.cidade}', '${dist.id}')" class="text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-map-location-dot text-red-600"></i> Ver no Mapa
+                                </button>
                             </div>
                             <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] space-y-1">
                                 <p class="text-slate-700"><i class="fa-solid fa-train-subway text-slate-400 mr-1.5"></i><strong>Estações:</strong> ${dist.estacoes}</p>
@@ -823,12 +1128,19 @@
                             </div>
                         </div>
                         <div class="p-3 space-y-2 bg-white">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Pontos neste distrito (${dist.pontos.length})</p>
                             ${pontosHTML}
                         </div>
                     </div>
                 `;
             });
+        }
+
+        function openDistrictInInteractiveMap(cityName, districtId) {
+            switchTab('lugares');
+            setTimeout(() => {
+                setMapCity(cityName);
+                focusDistrictOnMap(districtId);
+            }, 150);
         }
 
         function filterDistricts(city) {
@@ -843,69 +1155,106 @@
             });
         }
 
-        function renderPlaces() {
-            const container = document.getElementById('places-container');
-            const searchTerm = (document.getElementById('place-search')?.value || '').toLowerCase();
-            container.innerHTML = '';
+        // -------------------------------------------------------------------------
+        // 5. MOTOR DE LEITURA MATRICIAL (LINHA 1: DIA SEM | LINHA 2: DIA MÊS | COL B: HORA)
+        // -------------------------------------------------------------------------
+        function parseMatrixSheetToTimeline(rows2D) {
+            if (!rows2D || rows2D.length < 3) return false;
 
-            districtsData.forEach(dist => {
-                const matchingPoints = dist.pontos.filter(p => 
-                    p.nome.toLowerCase().includes(searchTerm) || 
-                    p.desc.toLowerCase().includes(searchTerm) || 
-                    p.tipo.toLowerCase().includes(searchTerm) ||
-                    dist.distrito.toLowerCase().includes(searchTerm)
-                );
+            const rowWeekdays = rows2D[0];
+            const rowMonthDays = rows2D[1];
+            const maxCols = Math.max(rowWeekdays.length, rowMonthDays.length);
 
-                if (matchingPoints.length === 0) return;
+            const diasMap = {
+                10: "Domingo", 11: "Segunda-feira", 12: "Terça-feira", 13: "Quarta-feira",
+                14: "Quinta-feira", 15: "Sexta-feira", 16: "Sábado", 17: "Domingo",
+                18: "Segunda-feira", 19: "Terça-feira", 20: "Quarta-feira", 21: "Quinta-feira",
+                22: "Sexta-feira", 23: "Sábado", 24: "Domingo", 25: "Segunda-feira",
+                26: "Terça-feira", 27: "Quarta-feira", 28: "Quinta-feira", 29: "Sexta-feira"
+            };
 
-                let itemsHTML = '';
-                matchingPoints.forEach(item => {
-                    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.query)}`;
-                    itemsHTML += `
-                        <a href="${url}" target="_blank" class="flex items-center justify-between p-2.5 hover:bg-slate-50 rounded-lg border border-slate-100 transition">
-                            <div class="pr-2">
-                                <div class="flex items-center space-x-2">
-                                    <h4 class="text-xs font-bold text-slate-800">${item.nome}</h4>
-                                    <span class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-semibold">${item.tipo}</span>
-                                </div>
-                                <p class="text-[11px] text-slate-500 mt-0.5">${item.desc}</p>
-                            </div>
-                            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-location-arrow text-xs"></i>
-                            </div>
-                        </a>
-                    `;
-                });
+            const newTimeline = [];
 
-                container.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3.5">
-                        <div class="flex justify-between items-center mb-2">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">${dist.distrito}</h4>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${dist.corBadge}">${dist.cidade}</span>
-                        </div>
-                        <div class="space-y-1.5">${itemsHTML}</div>
-                    </div>
-                `;
-            });
+            for (let c = 2; c < maxCols; c++) {
+                let rawDay = (rowMonthDays[c] || '').toString().trim();
+                let rawWeekday = (rowWeekdays[c] || '').toString().trim();
+
+                if (!rawDay && !rawWeekday) continue;
+
+                const dayMatch = rawDay.match(/\d+/);
+                const dayNum = dayMatch ? parseInt(dayMatch[0], 10) : null;
+
+                const dataFormatada = dayNum ? `${String(dayNum).padStart(2, '0')}/Jan/2027` : `${rawDay} Jan/2027`;
+                const diaSemanaFinal = rawWeekday || (dayNum && diasMap[dayNum]) || 'Janeiro 2027';
+
+                let cidadeAuto = "Tóquio";
+                if (dayNum) {
+                    if (dayNum <= 11 || dayNum >= 28) cidadeAuto = "Voos";
+                    else if (dayNum >= 24 && dayNum <= 27) cidadeAuto = "Osaka";
+                }
+
+                const atividadesDoDia = [];
+
+                for (let r = 2; r < rows2D.length; r++) {
+                    const row = rows2D[r];
+                    if (!row) continue;
+
+                    const horaAprox = (row[1] || row[0] || '').toString().trim();
+                    const celulaEvento = (row[c] || '').toString().trim();
+
+                    if (celulaEvento !== '') {
+                        const partes = celulaEvento.split(/\n| - /);
+                        const tituloLocal = partes[0].trim();
+                        const detalheLocal = partes.slice(1).join(' • ').trim() || `Horário aproximado: ${horaAprox || 'No dia'}`;
+
+                        atividadesDoDia.push({
+                            hora: horaAprox || '--:--',
+                            local: tituloLocal,
+                            desc: detalheLocal,
+                            mapQuery: `${tituloLocal} ${cidadeAuto === 'Voos' ? '' : cidadeAuto} Japan`
+                        });
+                    }
+                }
+
+                if (atividadesDoDia.length > 0) {
+                    newTimeline.push({
+                        id: `dia-${dayNum || c}`,
+                        diaMes: dayNum ? String(dayNum).padStart(2, '0') : String(c - 1),
+                        dataCompleta: dataFormatada,
+                        diaSemana: diaSemanaFinal,
+                        cidade: cidadeAuto,
+                        titulo: atividadesDoDia[0].local,
+                        atividades: atividadesDoDia
+                    });
+                }
+            }
+
+            if (newTimeline.length > 0) {
+                timelineData = newTimeline;
+                renderDayJumper();
+                renderTimeline('todos');
+                return true;
+            }
+            return false;
         }
 
-        // -------------------------------------------------------------------------
-        // 5. SINCRONIZAÇÃO MATRICIAL COM GOOGLE SHEETS OU COLAGEM DIRETA
-        // -------------------------------------------------------------------------
         function trySyncSheet() {
             const statusBox = document.getElementById('sync-status');
-            statusBox.innerHTML = `<span><i class="fa-solid fa-spinner fa-spin mr-1"></i> Lendo matriz da aba Timeline (Jan/2027)...</span>`;
+            statusBox.innerHTML = `<span><i class="fa-solid fa-spinner fa-spin mr-1"></i> Sincronizando grade...</span>`;
 
-            Papa.parse(CSV_URL, {
+            // Extrai URL dinâmica do link da planilha caso disponível
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/1VC468A5pPLkf0rNZBxO7uSJBauq3fdUCyGkZ3PCDskk/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+
+            Papa.parse(sheetUrl, {
                 download: true,
-                header: false, // IMPORTANTE: false para ler como Matriz 2D (Linha 1, Linha 2, Coluna B)
+                header: false,
                 skipEmptyLines: false,
                 complete: function(results) {
                     if (results && results.data && results.data.length >= 3) {
                         const ok = parseMatrixSheetToTimeline(results.data);
                         if (ok) {
                             statusBox.className = "mb-3 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 text-xs text-emerald-800 flex items-center justify-between";
-                            statusBox.innerHTML = `<span><i class="fa-solid fa-check-circle mr-1"></i> Grade sincronizada direto da planilha (Jan 2027)!</span>`;
+                            statusBox.innerHTML = `<span><i class="fa-solid fa-check-circle mr-1"></i> Grade sincronizada (Jan 2027)!</span>`;
                             return;
                         }
                     }
@@ -921,33 +1270,22 @@
             const statusBox = document.getElementById('sync-status');
             statusBox.className = "mb-3 bg-slate-100 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-700 flex items-center justify-between";
             statusBox.innerHTML = `
-                <span><i class="fa-solid fa-calendar-check text-red-600 mr-1"></i> Calendário de <strong>10 a 29 de Janeiro de 2027</strong> ativo.</span>
-                <button onclick="openPasteModal()" class="text-red-600 font-bold underline ml-2 shrink-0">Colar da Planilha</button>
+                <span><i class="fa-solid fa-calendar-check text-red-600 mr-1"></i> Cronograma <strong>10 a 29/Jan/2027</strong> carregado.</span>
+                <button onclick="openPasteModal()" class="text-red-600 font-bold underline ml-2 shrink-0">Colar Grade</button>
             `;
         }
 
-        function openPasteModal() {
-            document.getElementById('paste-modal').classList.remove('hidden');
-        }
-        function closePasteModal() {
-            document.getElementById('paste-modal').classList.add('hidden');
-        }
+        function openPasteModal() { document.getElementById('paste-modal').classList.remove('hidden'); }
+        function closePasteModal() { document.getElementById('paste-modal').classList.add('hidden'); }
 
         function processPastedMatrix() {
             const rawText = document.getElementById('tsv-input').value;
             if (!rawText.trim()) return;
-
             const parsed = Papa.parse(rawText, { header: false });
             if (parsed && parsed.data && parsed.data.length >= 3) {
-                const ok = parseMatrixSheetToTimeline(parsed.data);
-                if (ok) {
+                if (parseMatrixSheetToTimeline(parsed.data)) {
                     localStorage.setItem('japao2027_matrix', rawText);
                     closePasteModal();
-                    const statusBox = document.getElementById('sync-status');
-                    statusBox.className = "mb-3 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 text-xs text-emerald-800 flex items-center justify-between";
-                    statusBox.innerHTML = `<span><i class="fa-solid fa-check-circle mr-1"></i> Grade da planilha importada e salva no aparelho!</span>`;
-                } else {
-                    alert("Não foi possível identificar a Linha 1 (Dia da Semana), Linha 2 (Dia do Mês) e Coluna B (Horas). Verifique se copiou desde a célula A1.");
                 }
             }
         }
@@ -961,7 +1299,7 @@
         }
 
         // -------------------------------------------------------------------------
-        // 6. NAVEGAÇÃO E UTILITÁRIOS
+        // 6. NAVEGAÇÃO ENTRE ABAS
         // -------------------------------------------------------------------------
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -976,17 +1314,26 @@
             activeBtn.classList.remove('text-slate-400');
             activeBtn.classList.add('text-red-600', 'font-semibold');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Inicializa ou reajusta o tamanho do mapa interativo ao abrir a aba Salvos Maps
+            if (tabName === 'lugares') {
+                setTimeout(() => {
+                    if (!mapInstance) {
+                        initInteractiveMap();
+                    } else {
+                        mapInstance.invalidateSize();
+                    }
+                }, 100);
+            }
         }
 
         function convertCurrency() {
             const yen = parseFloat(document.getElementById('yen-input').value) || 0;
-            const rate = 0.038;
-            const brl = (yen * rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const brl = (yen * 0.038).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             document.getElementById('brl-output').textContent = brl;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Verifica se já existe uma grade colada salva no celular
             const savedMatrix = localStorage.getItem('japao2027_matrix');
             if (savedMatrix) {
                 const parsed = Papa.parse(savedMatrix, { header: false });
@@ -995,7 +1342,8 @@
             renderDayJumper();
             renderTimeline('todos');
             renderDistricts('todos');
-            renderPlaces();
+            renderMapDistrictPills();
+            renderPlacesList();
             if (!savedMatrix) trySyncSheet();
         });
     </script>
