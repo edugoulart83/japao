@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Japão 2027 - Guia de Viagem</title>
+    <title>Japão 2027 - Guia da Viagem</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -31,13 +31,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Estilos do Mapa Interativo Ilustrado / Cartográfico */
+        /* Estilos do Mapa Interativo */
         #interactive-map {
             height: 350px;
             width: 100%;
             border-radius: 1rem;
             z-index: 10;
-            /* Fundo estilo guia turístico (água/papel suave) quando no modo Ilustrado */
             background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
         }
         .illustrated-bg {
@@ -70,16 +69,6 @@
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
-        .water-label {
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            color: #0284c7;
-            font-weight: 700;
-            font-size: 10px;
-            font-style: italic;
-            opacity: 0.75;
-        }
         .leaflet-popup-content-wrapper {
             border-radius: 14px;
             padding: 2px;
@@ -99,7 +88,7 @@
                 <i class="fa-solid fa-torii-gate text-xl"></i>
                 <div>
                     <h1 class="text-lg font-bold leading-tight">Japão • Jan 2027</h1>
-                    <p class="text-[11px] text-red-100 leading-none">10/Jan a 29/Jan • Tóquio, Osaka & Quioto</p>
+                    <p class="text-[11px] text-red-100 leading-none">10/Jan a 29/Jan • Reserva AP5HZU</p>
                 </div>
             </div>
             <button onclick="openPasteModal()" 
@@ -112,22 +101,24 @@
     <!-- Container Principal (Mobile First) -->
     <main class="max-w-md mx-auto px-4 pt-4">
 
-        <!-- ================= ABA 1: TIMELINE ================= -->
+        <!-- ================= ABA 1: ITINERÁRIO & TIME LINE ================= -->
         <section id="tab-timeline" class="tab-content active">
             
+            <!-- Filtros por Fase da Viagem -->
             <div class="flex space-x-2 overflow-x-auto no-scrollbar pb-2 mb-2" id="city-filters">
                 <button onclick="filterTimeline('todos')" class="filter-btn bg-slate-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">Todos (10 a 29/Jan)</button>
-                <button onclick="filterTimeline('Tóquio')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🗼 Tóquio (12 a 23/Jan)</button>
-                <button onclick="filterTimeline('Osaka')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🏯 Osaka / Quioto (24 a 28/Jan)</button>
-                <button onclick="filterTimeline('Voos')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">✈️ Voos</button>
+                <button onclick="filterTimeline('Fase 1')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">✈️ Fase 1: Ida & Chegada</button>
+                <button onclick="filterTimeline('Tóquio')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🗼 Fase 2/3: Tóquio (13 a 22)</button>
+                <button onclick="filterTimeline('Nagahama')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🏯 Nagahama & Quioto (22 a 24)</button>
+                <button onclick="filterTimeline('Osaka')" class="filter-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🦌 Fase 4/5: Osaka & Retorno</button>
             </div>
 
             <!-- Carrossel de Datas -->
             <div class="flex space-x-1.5 overflow-x-auto no-scrollbar py-2 mb-3 border-y border-slate-200" id="day-jumper"></div>
 
-            <!-- Status de Sincronização Matricial -->
-            <div id="sync-status" class="mb-3 bg-blue-50 border border-blue-200 rounded-lg p-2.5 text-xs text-blue-700 flex items-center justify-between">
-                <span><i class="fa-solid fa-table-cells mr-1"></i> Leitor: Linha 1 (Sem), Linha 2 (Dia), Col B (Hora).</span>
+            <!-- Status de Sincronização -->
+            <div id="sync-status" class="mb-3 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 text-xs text-emerald-800 flex items-center justify-between">
+                <span><i class="fa-solid fa-check-circle mr-1"></i> Roteiro integrado com o Doc <strong>Itinerário & Transportes</strong>!</span>
                 <button onclick="trySyncSheet()" class="underline font-semibold ml-2 shrink-0">Sincronizar</button>
             </div>
 
@@ -139,28 +130,29 @@
         <section id="tab-distritos" class="tab-content">
             
             <div class="mb-3">
-                <h2 class="text-base font-bold text-slate-800">Guia de Distritos & Logística</h2>
-                <p class="text-xs text-slate-500">Melhores conexões de metrô/JR partindo de Kinshicho (Tóquio) e Namba South (Osaka).</p>
+                <h2 class="text-base font-bold text-slate-800">Guia por Distrito & Bairros</h2>
+                <p class="text-xs text-slate-500">Bases oficiais: <strong>Minn Shin-Osaka</strong>, <strong>The Park両国緑 (Ryogoku)</strong>, <strong>Nagahama</strong> e <strong>ESLEAD Hotel Namba South I / Welina</strong>.</p>
             </div>
 
             <div class="flex space-x-2 overflow-x-auto no-scrollbar pb-3 mb-2" id="district-filters">
-                <button onclick="filterDistricts('todos')" class="dist-btn bg-red-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">Todas as Regiões</button>
+                <button onclick="filterDistricts('todos')" class="dist-btn bg-red-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">Todos</button>
                 <button onclick="filterDistricts('Tóquio')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🗼 Tóquio</button>
                 <button onclick="filterDistricts('Osaka')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🏯 Osaka</button>
-                <button onclick="filterDistricts('Quioto')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">⛩️ Quioto</button>
+                <button onclick="filterDistricts('Quioto')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">⛩️ Nagahama & Quioto</button>
+                <button onclick="filterDistricts('Hiroshima')" class="dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition">🍁 Hiroshima</button>
             </div>
 
             <div id="districts-container" class="space-y-4"></div>
 
         </section>
 
-        <!-- ================= ABA 3: SALVOS MAPS (MAPA INTERATIVO POR DISTRITO) ================= -->
+        <!-- ================= ABA 3: SALVOS MAPS (MAPA INTERATIVO) ================= -->
         <section id="tab-lugares" class="tab-content">
             
             <div class="flex items-center justify-between mb-2.5">
                 <div>
-                    <h2 class="text-base font-bold text-slate-800">Mapa de Distritos & Salvos</h2>
-                    <p class="text-[11px] text-slate-500">Toque nos blocos coloridos ou nos pinos para rotas.</p>
+                    <h2 class="text-base font-bold text-slate-800">Mapa Interativo por Distrito</h2>
+                    <p class="text-[11px] text-slate-500">Toque em um distrito colorido ou pino para abrir a rota.</p>
                 </div>
                 <a href="https://maps.app.goo.gl/aFx7LsTvQDcHcHFMA" target="_blank" 
                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1 shrink-0">
@@ -169,29 +161,30 @@
             </div>
 
             <!-- Botões de Cidades do Mapa -->
-            <div class="grid grid-cols-3 gap-2 mb-3">
-                <button onclick="setMapCity('Tóquio')" id="map-city-Tóquio" class="map-city-btn bg-slate-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition">
+            <div class="flex space-x-1.5 overflow-x-auto no-scrollbar pb-2 mb-2">
+                <button onclick="setMapCity('Tóquio')" id="map-city-Tóquio" class="map-city-btn bg-slate-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow-sm flex items-center gap-1.5 shrink-0 transition">
                     <span>🗼</span> Tóquio
                 </button>
-                <button onclick="setMapCity('Osaka')" id="map-city-Osaka" class="map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition">
+                <button onclick="setMapCity('Osaka')" id="map-city-Osaka" class="map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3.5 rounded-xl flex items-center gap-1.5 shrink-0 transition">
                     <span>🏯</span> Osaka
                 </button>
-                <button onclick="setMapCity('Quioto')" id="map-city-Quioto" class="map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition">
-                    <span>⛩️</span> Quioto
+                <button onclick="setMapCity('Quioto')" id="map-city-Quioto" class="map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3.5 rounded-xl flex items-center gap-1.5 shrink-0 transition">
+                    <span>⛩️</span> Quioto & Nagahama
+                </button>
+                <button onclick="setMapCity('Hiroshima')" id="map-city-Hiroshima" class="map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3.5 rounded-xl flex items-center gap-1.5 shrink-0 transition">
+                    <span>🍁</span> Hiroshima
                 </button>
             </div>
 
-            <!-- Container do Mapa Interativo (Sem API Key + Modo Ilustrado) -->
+            <!-- Container do Mapa Interativo -->
             <div class="relative mb-3 shadow-md rounded-2xl border-2 border-slate-200 overflow-hidden">
                 <div id="interactive-map" class="illustrated-bg"></div>
                 
-                <!-- Alternador de Fundo: Mapa Ilustrado vs Ruas Reais -->
                 <button onclick="toggleMapBackgroundStyle()" id="bg-style-btn" 
                         class="absolute bottom-2.5 left-2.5 z-[400] bg-slate-900/90 hover:bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-md flex items-center gap-1.5 backdrop-blur-sm transition">
-                    <i class="fa-solid fa-layer-group text-amber-400"></i> <span id="bg-style-label">Ver Ruas no Fundo</span>
+                    <i class="fa-solid fa-layer-group text-amber-400"></i> <span id="bg-style-label">Modo Guia Ilustrado</span>
                 </button>
 
-                <!-- Botão Visão Geral -->
                 <button onclick="resetCityZoom()" 
                         class="absolute top-2.5 right-2.5 z-[400] bg-white/95 hover:bg-white text-slate-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow border border-slate-200 flex items-center gap-1">
                     <i class="fa-solid fa-expand"></i> Visão Geral
@@ -204,107 +197,499 @@
             <!-- Busca Rápida -->
             <div class="relative mb-3">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-xs"></i>
-                <input type="text" id="place-search" oninput="renderPlacesList()" placeholder="Buscar local salvo (ex: Guitar, Nintendo, Senso-ji, Hotel)..." 
+                <input type="text" id="place-search" oninput="renderPlacesList()" placeholder="Buscar local (ex: The Park, Gyukatsu, Itoya, Joypolis, Tower Records)..." 
                        class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 shadow-sm">
             </div>
 
-            <!-- Lista de Locais Organizados por Distrito com Botão de Direções -->
             <div class="space-y-4" id="places-container"></div>
 
         </section>
 
-        <!-- ================= ABA 4: TRANSPORTE & PREÇOS ================= -->
+        <!-- ================= ABA 4: TRANSPORTES (GUIA COMPLETO DO DOC) ================= -->
         <section id="tab-transporte" class="tab-content">
             
-            <div class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-r-xl mb-5 text-xs text-amber-900">
-                <p class="font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Dica para suas Bases (Kinshicho & Namba):</p>
-                <p>Em Tóquio, a estação <strong>Kinshicho</strong> tem acesso direto à linha <em>JR Sobu</em> (rápida p/ Akihabara, Ochanomizu e Shinjuku) e à linha <em>Tokyo Metro Hanzomon</em> (direta p/ Skytree e Shibuya). Em Osaka, <strong>Namba South</strong> conecta direto a Shinsekai e Dotonbori.</p>
+            <div class="mb-3">
+                <h2 class="text-base font-bold text-slate-800">Guia de Transportes & Bases</h2>
+                <p class="text-xs text-slate-500">Rotas detalhadas por fase, conexões das acomodações e passes recomendados.</p>
             </div>
 
-            <!-- Calculadora / Conversor Rápido -->
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-5">
-                <h3 class="text-xs font-bold uppercase text-slate-400 mb-2">Simulador Rápido de Iene (¥)</h3>
+            <!-- Destaque JR Kansai-Hiroshima Area Pass -->
+            <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-4 text-white shadow-md mb-4">
+                <div class="flex justify-between items-start">
+                    <span class="bg-white/25 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded">Recomendação Imperdível (24 a 28/01)</span>
+                    <span class="text-lg font-extrabold">¥17.000</span>
+                </div>
+                <h3 class="text-sm font-bold mt-1.5">JR Kansai-Hiroshima Area Pass (5 Dias)</h3>
+                <p class="text-[11px] text-amber-50 mt-1 leading-snug">Economia de mais de <strong>¥10.000 por pessoa</strong>! Cobre:</p>
+                <ul class="text-[11px] text-white mt-2 space-y-1 list-disc list-inside font-medium">
+                    <li>Bate-volta Shinkansen <strong>Shin-Osaka ⇄ Hiroshima</strong> (avulso seria ~¥21.400!)</li>
+                    <li>Shinkansen Sanyo (incluindo trens <em>Nozomi</em> e <em>Mizuho</em>)</li>
+                    <li>Trens JR em Kansai (Osaka, Quioto, Nara, Kobe e Universal City USJ)</li>
+                    <li>Ferry JR para a Ilha de Miyajima (Santuário Itsukushima)</li>
+                </ul>
+            </div>
+
+            <!-- Nossas 4 Bases e Conexões de Chegada/Saída -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-red-600 mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-hotel"></i> Hospedagens Reservadas & Logística
+                </h3>
+                <div class="space-y-3 text-xs">
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">12/01 a 13/01 (Check-out 10:00)</span>
+                                <h4 class="font-bold text-slate-800 mt-1">1. Minn Shin-Osaka</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5"><strong>Chegada (12/01):</strong> Limousine Bus do Aeroporto Itami direto p/ Shin-Osaka Station (25-30 min • <strong>¥510</strong>).</p>
+                            </div>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=Minn+Shin-Osaka&travelmode=transit" target="_blank" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[10px] shrink-0">Rota</a>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[10px] font-bold text-red-700 bg-red-100 px-1.5 py-0.5 rounded">13/01 (16:00) a 22/01 (Check-out 10:00)</span>
+                                <h4 class="font-bold text-slate-800 mt-1">2. The Park両国緑 (Ryogoku - Tóquio)</h4>
+                                <p class="text-[11px] text-slate-600 font-medium">Endereço: 1-22-4 Midori, Sumida City</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5"><strong>Estação Ryogoku:</strong> Linhas <em>JR Chūō-Sōbu</em> e <em>Toei Ōedo</em> (3 min a pé). De Tokyo Station: JR Yamanote até Akihabara (4 min) + JR Sōbu até Ryogoku (4 min) por <strong>¥170</strong>.</p>
+                            </div>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=1-22-4+Midori+Sumida+City+Tokyo&travelmode=transit" target="_blank" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[10px] shrink-0">Rota</a>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[10px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">22/01 a 24/01</span>
+                                <h4 class="font-bold text-slate-800 mt-1">3. Base Shiga / Nagahama (Nati)</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5"><strong>Chegada (22/01):</strong> Shinkansen <em>Hikari</em> de Tokyo Sta até Maibara (~2h15) + JR até Nagahama (10 min) por <strong>¥12.870</strong>. Despachar malas grandes de Tóquio direto p/ Osaka via <em>Yamato Takkyubin</em> (<strong>¥2.500~¥3.000/mala</strong>).</p>
+                            </div>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=Nagahama+Station+Shiga&travelmode=transit" target="_blank" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[10px] shrink-0">Rota</a>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[10px] font-bold text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded">24/01 (16:00) a 28/01 (Check-out 10:00)</span>
+                                <h4 class="font-bold text-slate-800 mt-1">4. ESLEAD HOTEL Namba South I / Welina</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5"><strong>Saída p/ Aeroporto (28/01 às 14:00):</strong> Limousine Bus saindo do terminal OCAT (Namba) direto até Osaka Itami (35 min • <strong>¥650</strong>).</p>
+                            </div>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=ESLEAD+HOTEL+Namba+South+I&travelmode=transit" target="_blank" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[10px] shrink-0">Rota</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela Resumo de Transportes (1 Pessoa) -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4">
+                <div class="bg-slate-800 text-white px-4 py-2.5 flex justify-between items-center">
+                    <span class="font-bold text-sm"><i class="fa-solid fa-route mr-1.5 text-emerald-400"></i> Tabela de Trechos Principais</span>
+                    <span class="text-[11px] bg-emerald-600 px-2 py-0.5 rounded font-bold">~¥61.390 / pessoa</span>
+                </div>
+                <div class="divide-y divide-slate-100 text-xs">
+                    <div class="p-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800">12/01 • Itami (ITM) ➔ Shin-Osaka</p>
+                            <p class="text-[11px] text-slate-500">Airport Limousine Bus (25-30 min)</p>
+                        </div>
+                        <span class="font-extrabold text-slate-800">¥510 <span class="text-[10px] font-normal text-slate-400">(~R$ 19)</span></span>
+                    </div>
+                    <div class="p-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800">13/01 • Shin-Osaka ➔ Tokyo Station</p>
+                            <p class="text-[11px] text-slate-500">Shinkansen Nozomi Reservado (Fileira E - vista Fuji)</p>
+                        </div>
+                        <span class="font-extrabold text-blue-700">¥14.720 <span class="text-[10px] font-normal text-slate-400">(~R$ 560)</span></span>
+                    </div>
+                    <div class="p-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800">15/01 • Bate-volta Monte Fuji (Kawaguchiko)</p>
+                            <p class="text-[11px] text-slate-500">Opção B: Highway Bus Busta Shinjuku (1h45)<br><span class="text-slate-400">*(Opção A: Trem Fuji Excursion = ¥8.260 ida/volta)*</span></p>
+                        </div>
+                        <span class="font-extrabold text-slate-800">¥4.400 <span class="text-[10px] font-normal text-slate-400">(~R$ 167)</span></span>
+                    </div>
+                    <div class="p-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800">17/01 • Bate-volta Yokohama (Ida/Volta)</p>
+                            <p class="text-[11px] text-slate-500">JR Sōbu + Ueno-Tokyo / Tokaido Line (~40 min)</p>
+                        </div>
+                        <span class="font-extrabold text-slate-800">~¥1.240 <span class="text-[10px] font-normal text-slate-400">(~R$ 47)</span></span>
+                    </div>
+                    <div class="p-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800">14 a 22/01 • Metrô e Trens Urbanos (Suica/Pasmo)</p>
+                            <p class="text-[11px] text-slate-500">Circulação diária em Tóquio + DisneySea (¥640 JR + ¥600 Monotrilho)</p>
+                        </div>
+                        <span class="font-extrabold text-slate-800">~¥10.000 <span class="text-[10px] font-normal text-slate-400">(~R$ 380)</span></span>
+                    </div>
+                    <div class="p-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800">22/01 • Tokyo Sta ➔ Maibara / Nagahama</p>
+                            <p class="text-[11px] text-slate-500">Shinkansen Hikari (2h15) + JR Biwako Line (10 min)</p>
+                        </div>
+                        <span class="font-extrabold text-blue-700">¥12.870 <span class="text-[10px] font-normal text-slate-400">(~R$ 489)</span></span>
+                    </div>
+                    <div class="p-3 flex justify-between items-center bg-amber-50/60">
+                        <div>
+                            <p class="font-bold text-amber-900">24 a 28/01 • JR Kansai-Hiroshima Area Pass</p>
+                            <p class="text-[11px] text-amber-800">Passe 5 dias: Hiroshima, Miyajima Ferry, Quioto e USJ</p>
+                        </div>
+                        <span class="font-extrabold text-amber-800">¥17.000 <span class="text-[10px] font-normal text-amber-700">(~R$ 646)</span></span>
+                    </div>
+                    <div class="p-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800">28/01 • Namba (OCAT) ➔ Aeroporto Itami</p>
+                            <p class="text-[11px] text-slate-500">Airport Limousine Bus (~35 min)</p>
+                        </div>
+                        <span class="font-extrabold text-slate-800">¥650 <span class="text-[10px] font-normal text-slate-400">(~R$ 25)</span></span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= ABA 5: VALORES, ORÇAMENTO & REGISTRADOR DE GASTOS ================= -->
+        <section id="tab-valores" class="tab-content">
+            
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800">Controle de Gastos & Valores</h2>
+                    <p class="text-xs text-slate-500">Lance gastos em Ienes (¥) e acompanhe o saldo no celular.</p>
+                </div>
+                <select id="rate-selector" onchange="onRateChange()" class="text-[11px] bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold text-slate-700 shadow-sm">
+                    <option value="0.034">1¥ = R$ 0,034</option>
+                    <option value="0.038">1¥ = R$ 0,038</option>
+                </select>
+            </div>
+
+            <!-- PAINEL INTERATIVO DE SALDO DO ORÇAMENTO (¥ 1.193.790) -->
+            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-4 text-white shadow-lg mb-4">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Saldo Restante do Orçamento</span>
+                        <h3 id="budget-remaining-yen" class="text-2xl font-extrabold text-emerald-400 leading-tight mt-0.5">¥ 1.193.790</h3>
+                        <p id="budget-remaining-brl" class="text-xs text-slate-300 font-medium">≈ R$ 40.588,86 disponíveis</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Orçamento Base</span>
+                        <p class="text-xs font-bold text-white mt-0.5">¥ 1.193.790</p>
+                        <span id="budget-percent-badge" class="inline-block mt-1 text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full">
+                            0% usado
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Barra de Progresso Geral -->
+                <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden my-2.5">
+                    <div id="budget-progress-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <div class="flex justify-between items-center text-[11px] text-slate-300 pt-1 border-t border-slate-700/80">
+                    <span>Total Gasto: <strong id="budget-spent-yen" class="text-white">¥ 0</strong> (<span id="budget-spent-brl">R$ 0,00</span>)</span>
+                    <button onclick="preloadSheetAdvances()" class="text-[10px] text-amber-300 hover:underline font-semibold">
+                        <i class="fa-solid fa-bolt mr-0.5"></i> + Adiantamentos Planilha
+                    </button>
+                </div>
+            </div>
+
+            <!-- FORMULÁRIO RÁPIDO PARA LANÇAR GASTO EM IENES -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-4">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-red-600 mb-3 flex items-center justify-between">
+                    <span><i class="fa-solid fa-plus-circle mr-1"></i> Lançar Novo Gasto</span>
+                    <span id="live-input-brl" class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">R$ 0,00</span>
+                </h3>
+
+                <div class="grid grid-cols-12 gap-2 mb-2.5">
+                    <!-- Valor em Ienes -->
+                    <div class="col-span-5 relative">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Valor em Ienes (¥)</label>
+                        <div class="relative">
+                            <span class="absolute left-2.5 top-2 text-slate-400 text-xs font-bold">¥</span>
+                            <input type="number" id="exp-amount" inputmode="numeric" placeholder="1500" oninput="updateLiveExpensePreview()"
+                                   class="w-full pl-6 pr-2 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-extrabold text-slate-800 focus:outline-none focus:border-red-500 focus:bg-white">
+                        </div>
+                    </div>
+
+                    <!-- Categoria -->
+                    <div class="col-span-7">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Categoria do Orçamento</label>
+                        <select id="exp-category" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-red-500">
+                            <option value="Alimentação">🍜 Alimentação (¥600k)</option>
+                            <option value="Ingressos">🎟️ Ingressos / Compras (¥105k)</option>
+                            <option value="Metrô/Trem">🚇 Metrô / Trem Local (¥106k)</option>
+                            <option value="Shinkansen">🚅 Shinkansen (¥82.7k)</option>
+                            <option value="Hospedagem">🏨 Hospedagem (¥300k)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-12 gap-2 mb-3">
+                    <!-- Dia da Viagem -->
+                    <div class="col-span-4">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Dia</label>
+                        <select id="exp-day" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-red-500">
+                            <option value="Pré-viagem">Pré-viagem</option>
+                            <option value="12/Jan">12/Jan (Ter)</option>
+                            <option value="13/Jan">13/Jan (Qua)</option>
+                            <option value="14/Jan">14/Jan (Qui)</option>
+                            <option value="15/Jan">15/Jan (Sex)</option>
+                            <option value="16/Jan">16/Jan (Sáb)</option>
+                            <option value="17/Jan">17/Jan (Dom)</option>
+                            <option value="18/Jan">18/Jan (Seg)</option>
+                            <option value="19/Jan">19/Jan (Ter)</option>
+                            <option value="20/Jan">20/Jan (Qua)</option>
+                            <option value="21/Jan">21/Jan (Qui)</option>
+                            <option value="22/Jan">22/Jan (Sex)</option>
+                            <option value="23/Jan">23/Jan (Sáb)</option>
+                            <option value="24/Jan">24/Jan (Dom)</option>
+                            <option value="25/Jan">25/Jan (Seg)</option>
+                            <option value="26/Jan">26/Jan (Ter)</option>
+                            <option value="27/Jan">27/Jan (Qua)</option>
+                            <option value="28/Jan">28/Jan (Qui)</option>
+                        </select>
+                    </div>
+
+                    <!-- Descrição -->
+                    <div class="col-span-8">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Descrição / Local</label>
+                        <input type="text" id="exp-desc" placeholder="Ex: Gyukatsu Shibuya, Recarga Suica..." 
+                               class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-red-500 focus:bg-white">
+                    </div>
+                </div>
+
+                <button onclick="addExpense()" class="w-full bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> Registrar Gasto no Celular
+                </button>
+            </div>
+
+            <!-- SALDO POR CATEGORIA (BARRAS DE PROGRESSO) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-4">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-pie text-blue-600"></i> Saldo Restante por Categoria
+                </h3>
+                <div id="category-breakdown-container" class="space-y-3">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <!-- HISTÓRICO DE GASTOS LANÇADOS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-5">
+                <div class="bg-slate-800 text-white px-4 py-2.5 flex justify-between items-center">
+                    <span class="font-bold text-xs uppercase tracking-wider"><i class="fa-solid fa-list-check mr-1.5 text-emerald-400"></i> Histórico de Lançamentos</span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportExpensesCSV()" title="Baixar CSV" class="text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-slate-200">
+                            <i class="fa-solid fa-download mr-0.5"></i> CSV
+                        </button>
+                        <button onclick="clearAllExpenses()" title="Zerar gastos" class="text-[10px] bg-red-900/60 hover:bg-red-800 px-2 py-1 rounded text-red-200">
+                            Limpar
+                        </button>
+                    </div>
+                </div>
+                <div id="expenses-list-container" class="divide-y divide-slate-100 max-h-72 overflow-y-auto">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <!-- TABELA 1: Orçamento Principal por Categoria (Aba Valores) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-4">
+                <div class="bg-red-700 text-white px-4 py-2.5 flex justify-between items-center">
+                    <span class="font-bold text-xs uppercase tracking-wider"><i class="fa-solid fa-table mr-1.5"></i> 1. Tabela Oficial (Aba Valores - 3p)</span>
+                    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded">Com Aéreo: R$ 60.588,86</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-[10px] uppercase">
+                                <th class="py-2 px-3">Despesa</th>
+                                <th class="py-2 px-2 text-right">Unit. (¥)</th>
+                                <th class="py-2 px-2 text-center">Qtde/Dias</th>
+                                <th class="py-2 px-2 text-right">Total (¥)</th>
+                                <th class="py-2 px-3 text-right">Total (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="py-2.5 px-3 font-bold text-slate-800">Hospedagem</td>
+                                <td class="py-2.5 px-2 text-right text-slate-600">¥20.000</td>
+                                <td class="py-2.5 px-2 text-center text-slate-500">1 × 15d</td>
+                                <td class="py-2.5 px-2 text-right font-semibold">¥300.000</td>
+                                <td class="py-2.5 px-3 text-right font-bold text-emerald-700">R$ 10.200,00</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 font-bold text-slate-800">Metrô/Trem</td>
+                                <td class="py-2.5 px-2 text-right text-slate-600">¥35.340</td>
+                                <td class="py-2.5 px-2 text-center text-slate-500">3 × 1</td>
+                                <td class="py-2.5 px-2 text-right font-semibold">¥106.020</td>
+                                <td class="py-2.5 px-3 text-right font-bold text-emerald-700">R$ 3.604,68</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 font-bold text-slate-800">Shinkansen</td>
+                                <td class="py-2.5 px-2 text-right text-slate-600">¥27.590</td>
+                                <td class="py-2.5 px-2 text-center text-slate-500">3 × 1</td>
+                                <td class="py-2.5 px-2 text-right font-semibold">¥82.770</td>
+                                <td class="py-2.5 px-3 text-right font-bold text-emerald-700">R$ 2.814,18</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 font-bold text-slate-800">Alimentação</td>
+                                <td class="py-2.5 px-2 text-right text-slate-600">¥10.000</td>
+                                <td class="py-2.5 px-2 text-center text-slate-500">3 × 20d</td>
+                                <td class="py-2.5 px-2 text-right font-semibold">¥600.000</td>
+                                <td class="py-2.5 px-3 text-right font-bold text-emerald-700">R$ 20.400,00</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 font-bold text-slate-800">Ingressos</td>
+                                <td class="py-2.5 px-2 text-right text-slate-600">¥35.000</td>
+                                <td class="py-2.5 px-2 text-center text-slate-500">3 × 1</td>
+                                <td class="py-2.5 px-2 text-right font-semibold">¥105.000</td>
+                                <td class="py-2.5 px-3 text-right font-bold text-emerald-700">R$ 3.570,00</td>
+                            </tr>
+                            <tr class="bg-slate-50 font-extrabold text-slate-900">
+                                <td class="py-2.5 px-3" colspan="3">Subtotal (Sem Passagem)</td>
+                                <td class="py-2.5 px-2 text-right">¥1.193.790</td>
+                                <td class="py-2.5 px-3 text-right text-emerald-700">R$ 40.588,86</td>
+                            </tr>
+                            <tr class="bg-amber-50/70 font-extrabold text-amber-900">
+                                <td class="py-2.5 px-3" colspan="3">Passagem Aérea</td>
+                                <td class="py-2.5 px-2 text-right">—</td>
+                                <td class="py-2.5 px-3 text-right">R$ 20.000,00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABELA 2: Detalhamento de Custos de Transporte p/ 1 e 3 Pessoas -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-4">
+                <div class="bg-blue-700 text-white px-4 py-2.5 flex justify-between items-center">
+                    <span class="font-bold text-xs uppercase tracking-wider"><i class="fa-solid fa-train mr-1.5"></i> 2. Custos por Trecho (1 vs 3 Pessoas)</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-[10px] uppercase">
+                                <th class="py-2 px-3">Trecho / Modalidade</th>
+                                <th class="py-2 px-2 text-right">1 Pessoa</th>
+                                <th class="py-2 px-2 text-right">3 Pessoas</th>
+                                <th class="py-2 px-3 text-right">Total R$ (3p)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="py-2 px-3">
+                                    <p class="font-bold text-slate-800">Itami ➔ Shin-Osaka (12/01)</p>
+                                    <p class="text-[10px] text-slate-500">Limousine Bus</p>
+                                </td>
+                                <td class="py-2 px-2 text-right">¥510</td>
+                                <td class="py-2 px-2 text-right font-semibold">¥1.530</td>
+                                <td class="py-2 px-3 text-right font-bold text-slate-700">~R$ 58</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3">
+                                    <p class="font-bold text-slate-800">Shin-Osaka ➔ Tóquio (13/01)</p>
+                                    <p class="text-[10px] text-slate-500">Shinkansen Nozomi (Assento E)</p>
+                                </td>
+                                <td class="py-2 px-2 text-right">¥14.720</td>
+                                <td class="py-2 px-2 text-right font-semibold">¥44.160</td>
+                                <td class="py-2 px-3 text-right font-bold text-blue-700">~R$ 1.678</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3">
+                                    <p class="font-bold text-slate-800">Tóquio ⇄ Kawaguchiko (15/01)</p>
+                                    <p class="text-[10px] text-slate-500">Highway Bus Busta Shinjuku</p>
+                                </td>
+                                <td class="py-2 px-2 text-right">¥4.400</td>
+                                <td class="py-2 px-2 text-right font-semibold">¥13.200</td>
+                                <td class="py-2 px-3 text-right font-bold text-slate-700">~R$ 501</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3">
+                                    <p class="font-bold text-slate-800">Ryogoku ⇄ Yokohama (17/01)</p>
+                                    <p class="text-[10px] text-slate-500">JR Sōbu + Ueno-Tokyo Line</p>
+                                </td>
+                                <td class="py-2 px-2 text-right">¥1.240</td>
+                                <td class="py-2 px-2 text-right font-semibold">¥3.720</td>
+                                <td class="py-2 px-3 text-right font-bold text-slate-700">~R$ 141</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3">
+                                    <p class="font-bold text-slate-800">Metrô / Trens Urbanos (IC Card)</p>
+                                    <p class="text-[10px] text-slate-500">Suica / Pasmo (14 a 22/01)</p>
+                                </td>
+                                <td class="py-2 px-2 text-right">¥10.000</td>
+                                <td class="py-2 px-2 text-right font-semibold">¥30.000</td>
+                                <td class="py-2 px-3 text-right font-bold text-slate-700">~R$ 1.140</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3">
+                                    <p class="font-bold text-slate-800">Tóquio ➔ Maibara/Nagahama (22/01)</p>
+                                    <p class="text-[10px] text-slate-500">Shinkansen Hikari Reservado</p>
+                                </td>
+                                <td class="py-2 px-2 text-right">¥12.870</td>
+                                <td class="py-2 px-2 text-right font-semibold">¥38.610</td>
+                                <td class="py-2 px-3 text-right font-bold text-blue-700">~R$ 1.467</td>
+                            </tr>
+                            <tr class="bg-amber-50/60">
+                                <td class="py-2 px-3">
+                                    <p class="font-bold text-amber-900">JR Kansai-Hiroshima Pass (5d)</p>
+                                    <p class="text-[10px] text-amber-800">Cobre Hiroshima, Miyajima, USJ e Quioto</p>
+                                </td>
+                                <td class="py-2 px-2 text-right font-bold text-amber-900">¥17.000</td>
+                                <td class="py-2 px-2 text-right font-bold text-amber-900">¥51.000</td>
+                                <td class="py-2 px-3 text-right font-extrabold text-amber-800">~R$ 1.938</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3">
+                                    <p class="font-bold text-slate-800">Namba (OCAT) ➔ Itami (28/01)</p>
+                                    <p class="text-[10px] text-slate-500">Limousine Bus</p>
+                                </td>
+                                <td class="py-2 px-2 text-right">¥650</td>
+                                <td class="py-2 px-2 text-right font-semibold">¥1.950</td>
+                                <td class="py-2 px-3 text-right font-bold text-slate-700">~R$ 74</td>
+                            </tr>
+                            <tr class="bg-slate-100 font-extrabold text-slate-900">
+                                <td class="py-2.5 px-3">Total Transporte Terrestre</td>
+                                <td class="py-2.5 px-2 text-right">¥61.390</td>
+                                <td class="py-2.5 px-2 text-right">¥184.170</td>
+                                <td class="py-2.5 px-3 text-right text-emerald-700">~R$ 6.996</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Conversor Rápido de Moeda -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase text-slate-500 mb-2">Simulador Rápido Iene (¥) ➔ Real (R$)</h3>
                 <div class="flex items-center space-x-2">
                     <div class="relative flex-1">
                         <span class="absolute left-3 top-2 text-slate-400 text-sm">¥</span>
-                        <input type="number" id="yen-input" value="1000" oninput="convertCurrency()" 
-                               class="w-full pl-7 pr-3 py-1.5 border border-slate-300 rounded-lg text-sm font-semibold focus:outline-none focus:border-red-500">
+                        <input type="number" id="yen-input" value="10000" oninput="convertCurrency()" 
+                               class="w-full pl-7 pr-3 py-1.5 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:border-red-500">
                     </div>
                     <span class="text-slate-400">=</span>
-                    <div class="bg-slate-100 px-3 py-1.5 rounded-lg text-sm font-bold text-slate-700 flex-1 text-center" id="brl-output">
-                        R$ 38,00
-                    </div>
-                </div>
-                <p class="text-[10px] text-slate-400 mt-1.5 text-right">*Cotação base estimada: ¥1 = R$ 0,038</p>
-            </div>
-
-            <!-- Cards de Transporte -->
-            <div class="space-y-4">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-800 text-white px-4 py-2.5 flex justify-between items-center">
-                        <span class="font-bold text-sm"><i class="fa-solid fa-train-subway mr-1.5 text-emerald-400"></i> Metrô e Trens Locais</span>
-                        <span class="text-[11px] bg-slate-700 px-2 py-0.5 rounded">Uso Diário</span>
-                    </div>
-                    <div class="p-4 space-y-3 text-xs">
-                        <div class="flex justify-between items-start border-b border-slate-100 pb-2">
-                            <div>
-                                <p class="font-bold text-slate-800 text-sm">IC Card (Suica / Pasmo / Icoca)</p>
-                                <p class="text-slate-500">Cartão pré-pago recarregável. Essencial para usar na linha JR Sobu (Kinshicho) e metrôs.</p>
-                            </div>
-                            <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded whitespace-nowrap">¥180 ~ ¥400 / trecho</span>
-                        </div>
-                        <div class="flex justify-between items-start border-b border-slate-100 pb-2">
-                            <div>
-                                <p class="font-bold text-slate-800 text-sm">Tokyo Subway Ticket (72h)</p>
-                                <p class="text-slate-500">Uso ilimitado nas linhas Tokyo Metro (inclui Hanzomon Line em Kinshicho) e Toei.</p>
-                            </div>
-                            <div class="text-right whitespace-nowrap">
-                                <span class="block font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">72h: ¥1.500</span>
-                            </div>
-                        </div>
-                        <p class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded">
-                            <strong>Tarifa Infantil (6 a 11 anos):</strong> Paga exatamente <strong>50% da tarifa</strong> com um Child Suica/Pasmo.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-blue-700 text-white px-4 py-2.5 flex justify-between items-center">
-                        <span class="font-bold text-sm"><i class="fa-solid fa-bolt mr-1.5 text-yellow-300"></i> Shinkansen & Intercidades</span>
-                        <span class="text-[11px] bg-blue-800 px-2 py-0.5 rounded">Tóquio ➔ Osaka</span>
-                    </div>
-                    <div class="p-4 space-y-3 text-xs">
-                        <div class="flex justify-between items-start border-b border-slate-100 pb-2">
-                            <div>
-                                <p class="font-bold text-slate-800 text-sm">Tóquio ➔ Shin-Osaka (Trecho Avulso)</p>
-                                <p class="text-slate-500">Trem Nozomi (2h30). De Kinshicho até Tokyo Station são apenas 8 minutos pela linha JR Sobu Rapid!</p>
-                            </div>
-                            <div class="text-right whitespace-nowrap ml-2">
-                                <span class="block font-bold text-blue-700 text-sm">~ ¥14.720</span>
-                                <span class="text-[10px] text-slate-400">Adulto Reservado</span>
-                            </div>
-                        </div>
-                        <p class="text-[11px] text-amber-800 bg-amber-50 p-2 rounded">
-                            <strong><i class="fa-solid fa-suitcase mr-1"></i> Despacho de Malas (Takkyubin):</strong> Enviar as malas grandes de Sumida (Tóquio) para Namba (Osaka) custa cerca de <strong>¥2.500 a ¥3.200 por mala</strong>.
-                        </p>
+                    <div class="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl text-sm font-extrabold text-emerald-800 flex-1 text-center" id="brl-output">
+                        R$ 340,00
                     </div>
                 </div>
             </div>
+
         </section>
 
     </main>
 
-    <!-- Modal para Colar Dados da Aba Timeline -->
+    <!-- Modal para Colar Dados da Aba Time Line -->
     <div id="paste-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-4 shadow-xl">
             <div class="flex justify-between items-center mb-2">
-                <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-table mr-1.5 text-red-600"></i> Atualizar Grade da Timeline</h3>
+                <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-table mr-1.5 text-red-600"></i> Atualizar Grade da Time Line</h3>
                 <button onclick="closePasteModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <p class="text-[11px] text-slate-500 mb-3">
-                Selecione da célula <strong>A1</strong> até o final da aba <strong>Timeline</strong> no Google Sheets, copie (<kbd>Ctrl+C</kbd>) e cole abaixo:
+                Selecione da célula <strong>A1</strong> até <strong>V38</strong> da aba <strong>Time Line</strong> no Google Sheets, copie (<kbd>Ctrl+C</kbd>) e cole abaixo:
             </p>
-            <textarea id="tsv-input" rows="6" placeholder="Cole aqui as células copiadas da aba Timeline (Linha 1: Dias da Semana, Linha 2: Dias do Mês, Coluna B: Horas)..." 
+            <textarea id="tsv-input" rows="6" placeholder="Cole aqui as células copiadas da aba Time Line..." 
                       class="w-full p-2.5 border border-slate-300 rounded-xl text-xs font-mono focus:outline-none focus:border-red-500 mb-3"></textarea>
             <div class="flex justify-end space-x-2">
                 <button onclick="resetSavedMatrix()" class="text-xs text-slate-500 px-3 py-2 rounded-lg hover:bg-slate-100">Restaurar Padrão</button>
@@ -313,353 +698,726 @@
         </div>
     </div>
 
-    <!-- Barra de Navegação Inferior -->
+    <!-- Barra de Navegação Inferior (5 Abas) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-50">
-        <div class="max-w-md mx-auto flex justify-around">
-            <button onclick="switchTab('timeline')" id="nav-timeline" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-red-600 font-semibold transition">
+        <div class="max-w-md mx-auto grid grid-cols-5">
+            <button onclick="switchTab('timeline')" id="nav-timeline" class="nav-btn py-2 flex flex-col items-center text-red-600 font-semibold transition">
                 <i class="fa-solid fa-calendar-day text-base mb-0.5"></i>
-                <span class="text-[10px]">Timeline</span>
+                <span class="text-[10px]">Itinerário</span>
             </button>
-            <button onclick="switchTab('distritos')" id="nav-distritos" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
+            <button onclick="switchTab('distritos')" id="nav-distritos" class="nav-btn py-2 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
                 <i class="fa-solid fa-signs-post text-base mb-0.5"></i>
                 <span class="text-[10px]">Distritos</span>
             </button>
-            <button onclick="switchTab('lugares')" id="nav-lugares" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
+            <button onclick="switchTab('lugares')" id="nav-lugares" class="nav-btn py-2 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
                 <i class="fa-solid fa-map-location-dot text-base mb-0.5"></i>
                 <span class="text-[10px]">Salvos Maps</span>
             </button>
-            <button onclick="switchTab('transporte')" id="nav-transporte" class="nav-btn flex-1 py-2.5 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
-                <i class="fa-solid fa-train text-base mb-0.5"></i>
-                <span class="text-[10px]">Transporte</span>
+            <button onclick="switchTab('transporte')" id="nav-transporte" class="nav-btn py-2 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-train-subway text-base mb-0.5"></i>
+                <span class="text-[10px]">Transportes</span>
+            </button>
+            <button onclick="switchTab('valores')" id="nav-valores" class="nav-btn py-2 flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
+                <i class="fa-solid fa-coins text-base mb-0.5"></i>
+                <span class="text-[10px]">Valores</span>
             </button>
         </div>
     </nav>
 
     <!-- ================= SCRIPTS E DADOS ================= -->
     <script>
-        const SHEET_NAME = 'Timeline';
+        const SHEET_NAME = 'Time Line';
 
         // -------------------------------------------------------------------------
-        // 1. CONFIGURAÇÃO CARTOGRÁFICA E GEOMETRIA DOS DISTRITOS
-        // Polígonos orgânicos estilo mapa ilustrado + elementos geográficos de referência (Rios e Linhas JR)
+        // 1. CONTROLE DE ORÇAMENTO E REGISTRADOR DE GASTOS (LOCALSTORAGE)
+        // -------------------------------------------------------------------------
+        const TOTAL_BUDGET_YEN = 1193790;
+        const CATEGORY_BUDGETS = {
+            'Alimentação': { limit: 600000, icon: 'fa-utensils', color: '#e11d48' },
+            'Hospedagem':  { limit: 300000, icon: 'fa-bed', color: '#2563eb' },
+            'Metrô/Trem':  { limit: 106020, icon: 'fa-train-subway', color: '#059669' },
+            'Ingressos':   { limit: 105000, icon: 'fa-ticket', color: '#9333ea' },
+            'Shinkansen':  { limit: 82770,  icon: 'fa-bolt', color: '#d97706' }
+        };
+
+        let expensesList = [];
+
+        function loadExpenses() {
+            try {
+                const saved = localStorage.getItem('japao2027_expenses');
+                expensesList = saved ? JSON.parse(saved) : [];
+            } catch (e) {
+                expensesList = [];
+            }
+            renderBudgetTracker();
+        }
+
+        function saveExpenses() {
+            localStorage.setItem('japao2027_expenses', JSON.stringify(expensesList));
+            renderBudgetTracker();
+        }
+
+        function getCurrentRate() {
+            return parseFloat(document.getElementById('rate-selector')?.value) || 0.034;
+        }
+
+        function onRateChange() {
+            convertCurrency();
+            updateLiveExpensePreview();
+            renderBudgetTracker();
+        }
+
+        function updateLiveExpensePreview() {
+            const val = parseFloat(document.getElementById('exp-amount')?.value) || 0;
+            const brl = (val * getCurrentRate()).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const badge = document.getElementById('live-input-brl');
+            if (badge) badge.textContent = brl;
+        }
+
+        function addExpense() {
+            const amountInput = document.getElementById('exp-amount');
+            const categoryInput = document.getElementById('exp-category');
+            const dayInput = document.getElementById('exp-day');
+            const descInput = document.getElementById('exp-desc');
+
+            const yen = parseFloat(amountInput.value);
+            if (!yen || yen <= 0) {
+                alert('Informe um valor válido em Ienes (¥).');
+                return;
+            }
+
+            const newExp = {
+                id: Date.now(),
+                yen: Math.round(yen),
+                category: categoryInput.value,
+                day: dayInput.value,
+                desc: descInput.value.trim() || categoryInput.value
+            };
+
+            expensesList.unshift(newExp);
+            amountInput.value = '';
+            descInput.value = '';
+            updateLiveExpensePreview();
+            saveExpenses();
+        }
+
+        function deleteExpense(id) {
+            expensesList = expensesList.filter(item => item.id !== id);
+            saveExpenses();
+        }
+
+        function clearAllExpenses() {
+            if (expensesList.length === 0) return;
+            if (confirm('Deseja limpar todos os gastos registrados no aparelho?')) {
+                expensesList = [];
+                saveExpenses();
+            }
+        }
+
+        function preloadSheetAdvances() {
+            if (expensesList.some(e => e.id === 999001)) {
+                alert('Os adiantamentos da planilha já foram carregados na lista!');
+                return;
+            }
+            const advances = [
+                { id: 999001, yen: 212920, category: 'Hospedagem', day: 'Pré-viagem', desc: 'Adiantamento Hospedagem (Planilha)' },
+                { id: 999002, yen: 43106,  category: 'Shinkansen', day: 'Pré-viagem', desc: 'Adiantamento Shinkansen (Planilha)' },
+                { id: 999003, yen: 10294,  category: 'Metrô/Trem', day: 'Pré-viagem', desc: 'Adiantamento Metrô/Trem (R$ 350)' }
+            ];
+            expensesList = [...advances, ...expensesList];
+            saveExpenses();
+        }
+
+        function exportExpensesCSV() {
+            if (expensesList.length === 0) {
+                alert('Nenhum gasto registrado para exportar.');
+                return;
+            }
+            const rate = getCurrentRate();
+            let csv = 'Dia,Categoria,Descricao,Valor_Ienes,Valor_Reais\n';
+            expensesList.forEach(e => {
+                const brl = (e.yen * rate).toFixed(2);
+                const cleanDesc = e.desc.replace(/,/g, ' ');
+                csv += `${e.day},${e.category},"${cleanDesc}",${e.yen},${brl}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gastos_japao_2027.csv';
+            a.click();
+        }
+
+        function renderBudgetTracker() {
+            const rate = getCurrentRate();
+            const totalSpentYen = expensesList.reduce((acc, item) => acc + item.yen, 0);
+            const remainingYen = TOTAL_BUDGET_YEN - totalSpentYen;
+            const percentUsed = Math.min(100, Math.round((totalSpentYen / TOTAL_BUDGET_YEN) * 100));
+
+            // Atualiza Card Principal
+            const remYenEl = document.getElementById('budget-remaining-yen');
+            const remBrlEl = document.getElementById('budget-remaining-brl');
+            const spentYenEl = document.getElementById('budget-spent-yen');
+            const spentBrlEl = document.getElementById('budget-spent-brl');
+            const badgeEl = document.getElementById('budget-percent-badge');
+            const barEl = document.getElementById('budget-progress-bar');
+
+            if (remYenEl) {
+                remYenEl.textContent = `¥ ${remainingYen.toLocaleString('pt-BR')}`;
+                remYenEl.className = remainingYen >= 0 
+                    ? 'text-2xl font-extrabold text-emerald-400 leading-tight mt-0.5' 
+                    : 'text-2xl font-extrabold text-rose-400 leading-tight mt-0.5';
+            }
+            if (remBrlEl) {
+                const remBrl = (remainingYen * rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                remBrlEl.textContent = `≈ ${remBrl} ${remainingYen >= 0 ? 'disponíveis' : 'acima do previsto'}`;
+            }
+            if (spentYenEl) spentYenEl.textContent = `¥ ${totalSpentYen.toLocaleString('pt-BR')}`;
+            if (spentBrlEl) spentBrlEl.textContent = (totalSpentYen * rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            if (badgeEl) badgeEl.textContent = `${percentUsed}% usado`;
+            if (barEl) {
+                barEl.style.width = `${percentUsed}%`;
+                barEl.className = percentUsed > 90 ? 'bg-rose-500 h-full transition-all duration-300' : (percentUsed > 70 ? 'bg-amber-400 h-full transition-all duration-300' : 'bg-emerald-500 h-full transition-all duration-300');
+            }
+
+            // Atualiza Barras por Categoria
+            const catContainer = document.getElementById('category-breakdown-container');
+            if (catContainer) {
+                catContainer.innerHTML = '';
+                Object.keys(CATEGORY_BUDGETS).forEach(catName => {
+                    const cfg = CATEGORY_BUDGETS[catName];
+                    const spentCat = expensesList
+                        .filter(e => e.category === catName)
+                        .reduce((sum, e) => sum + e.yen, 0);
+                    const remCat = cfg.limit - spentCat;
+                    const pctCat = Math.min(100, Math.round((spentCat / cfg.limit) * 100));
+
+                    catContainer.innerHTML += `
+                        <div class="text-xs">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                                    <i class="fa-solid ${cfg.icon} text-[11px]" style="color:${cfg.color}"></i> ${catName}
+                                </span>
+                                <span class="text-[11px] font-semibold ${remCat >= 0 ? 'text-slate-600' : 'text-rose-600 font-bold'}">
+                                    Restam: <strong>¥ ${remCat.toLocaleString('pt-BR')}</strong> <span class="text-slate-400 font-normal">/ ¥${cfg.limit.toLocaleString('pt-BR')}</span>
+                                </span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-300" style="width:${pctCat}%; background-color:${remCat >= 0 ? cfg.color : '#e11d48'}"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Atualiza Lista de Lançamentos
+            const listContainer = document.getElementById('expenses-list-container');
+            if (listContainer) {
+                if (expensesList.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="p-6 text-center text-xs text-slate-400">
+                            <i class="fa-solid fa-receipt text-xl mb-1.5 block text-slate-300"></i>
+                            Nenhum gasto lançado ainda. Use o formulário acima ou toque em <strong>"+ Adiantamentos Planilha"</strong>.
+                        </div>
+                    `;
+                } else {
+                    listContainer.innerHTML = '';
+                    expensesList.forEach(item => {
+                        const cfg = CATEGORY_BUDGETS[item.category] || { icon: 'fa-yen-sign', color: '#64748b' };
+                        const itemBrl = (item.yen * rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        listContainer.innerHTML += `
+                            <div class="p-3 flex justify-between items-center hover:bg-slate-50 transition">
+                                <div class="flex items-center gap-2.5 pr-2">
+                                    <div class="w-7 h-7 rounded-full text-white flex items-center justify-center shrink-0 text-[11px]" style="background-color:${cfg.color}">
+                                        <i class="fa-solid ${cfg.icon}"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-800 leading-snug">${item.desc}</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold">${item.day} • ${item.category}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2.5 shrink-0">
+                                    <div class="text-right">
+                                        <span class="block text-xs font-extrabold text-slate-800">- ¥ ${item.yen.toLocaleString('pt-BR')}</span>
+                                        <span class="block text-[10px] text-slate-400">${itemBrl}</span>
+                                    </div>
+                                    <button onclick="deleteExpense(${item.id})" class="text-slate-300 hover:text-rose-600 p-1">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+        }
+
+        // -------------------------------------------------------------------------
+        // 2. CONFIGURAÇÃO CARTOGRÁFICA E PONTOS SALVOS (DETALHES + HOTÉIS DO DOC)
         // -------------------------------------------------------------------------
         const cityConfigs = {
             'Tóquio': {
-                center: [35.6820, 139.7520],
-                zoom: 11.5,
-                // Rio Sumida e Baía de Tóquio para dar referência visual limpa no modo Ilustrado
+                center: [35.6780, 139.7550],
+                zoom: 11.4,
                 waterWays: [
-                    {
-                        name: "Rio Sumida",
-                        coords: [[35.740, 139.802], [35.720, 139.801], [35.705, 139.794], [35.692, 139.787], [35.675, 139.780], [35.655, 139.772]]
-                    }
+                    { name: "Rio Sumida", coords: [[35.740, 139.802], [35.720, 139.801], [35.705, 139.794], [35.692, 139.787], [35.675, 139.780], [35.655, 139.772]] }
                 ],
-                waterPolygon: [
-                    [35.655, 139.760], [35.655, 139.835], [35.595, 139.835], [35.595, 139.740]
-                ],
-                // Anel da Linha JR Yamanote (referência clássica dos mapas turísticos de Tóquio)
+                waterPolygon: [[35.655, 139.760], [35.655, 139.835], [35.595, 139.835], [35.595, 139.740]],
                 railLoop: {
                     name: "Anel JR Yamanote Line",
-                    coords: [
-                        [35.713, 139.777], [35.730, 139.711], [35.690, 139.700],
-                        [35.658, 139.701], [35.628, 139.738], [35.681, 139.767],
-                        [35.698, 139.773], [35.713, 139.777]
-                    ]
+                    coords: [[35.713, 139.777], [35.730, 139.711], [35.690, 139.700], [35.658, 139.701], [35.628, 139.738], [35.681, 139.767], [35.698, 139.773], [35.713, 139.777]]
                 }
             },
             'Osaka': {
-                center: [34.6750, 135.4850],
-                zoom: 12,
+                center: [34.6820, 135.4950],
+                zoom: 11.8,
                 waterWays: [
-                    {
-                        name: "Rio Yodo / Okawa",
-                        coords: [[34.725, 135.525], [34.705, 135.505], [34.688, 135.465], [34.665, 135.415]]
-                    }
+                    { name: "Rio Yodo", coords: [[34.725, 135.525], [34.705, 135.505], [34.688, 135.465], [34.665, 135.415]] }
                 ],
-                waterPolygon: [
-                    [34.685, 135.380], [34.685, 135.430], [34.610, 135.445], [34.610, 135.380]
-                ],
+                waterPolygon: [[34.685, 135.380], [34.685, 135.430], [34.610, 135.445], [34.610, 135.380]],
                 railLoop: {
                     name: "Anel JR Osaka Loop Line",
-                    coords: [
-                        [34.702, 135.495], [34.696, 135.532], [34.665, 135.530],
-                        [34.646, 135.505], [34.668, 135.462], [34.702, 135.495]
-                    ]
+                    coords: [[34.702, 135.495], [34.696, 135.532], [34.665, 135.530], [34.646, 135.505], [34.668, 135.462], [34.702, 135.495]]
                 }
             },
             'Quioto': {
-                center: [35.0080, 135.7380],
-                zoom: 11.5,
+                center: [35.1500, 135.9500],
+                zoom: 9.5,
                 waterWays: [
-                    {
-                        name: "Rio Kamo (Kamogawa)",
-                        coords: [[35.060, 135.760], [35.030, 135.771], [35.003, 135.770], [34.975, 135.765], [34.945, 135.755]]
-                    }
+                    { name: "Rio Kamo", coords: [[35.060, 135.760], [35.030, 135.771], [35.003, 135.770], [34.975, 135.765]] }
                 ],
+                waterPolygon: [],
+                railLoop: null
+            },
+            'Hiroshima': {
+                center: [34.3450, 132.3850],
+                zoom: 11,
+                waterWays: [],
                 waterPolygon: [],
                 railLoop: null
             }
         };
 
         const districtsData = [
-            // ==================== TÓQUIO (6 DISTRITOS BEM SEPARADOS VISUALMENTE) ====================
+            // ==================== TÓQUIO ====================
             {
                 id: "tk-sumida",
                 cidade: "Tóquio",
-                distrito: "Sumida, Kinshicho & Asakusa",
-                curto: "Sumida / Asakusa",
-                vibe: "Nossa Base em Tóquio • Templos & Skytree",
-                corHex: "#e11d48", // Rose Red
-                corBadge: "bg-rose-100 text-rose-700",
-                estacoes: "Kinshicho Sta. (JR Sobu / Hanzomon) • Asakusa Sta. • Oshiage Sta.",
-                dicaLogistica: "Base em Kinshicho! Fica a 1 estação da Skytree e tem shoppings completos (Arcakit, Parco e Termina) ao lado da estação.",
-                center: [35.7060, 139.8080],
+                distrito: "Ryogoku, Asakusa & Skytree (Sumida)",
+                curto: "Ryogoku / Asakusa",
+                vibe: "Base The Park両国緑 (13 a 22/Jan) • Dia 14/01",
+                corHex: "#e11d48",
+                estacoes: "Ryogoku Sta. (JR Chūō-Sōbu e Toei Ōedo) • Asakusa Sta. • Oshiage Sta.",
+                dicaLogistica: "De Ryogoku p/ Asakusa: Linha Toei Asakusa em Kuramae ou Ônibus Toei direto (¥180). De Asakusa p/ Skytree: caminhada pela Sumida River Walk ou 1 parada de metrô (¥180).",
+                center: [35.7060, 139.8020],
                 zoom: 13.5,
-                polygon: [
-                    [35.726, 139.792], [35.728, 139.826], [35.705, 139.832],
-                    [35.686, 139.824], [35.686, 139.792], [35.706, 139.790]
-                ],
+                polygon: [[35.724, 139.788], [35.724, 139.824], [35.690, 139.824], [35.690, 139.788]],
                 pontos: [
-                    { nome: "Estação Kinshicho & Shoppings (Base)", tipo: "Hospedagem", icone: "fa-bed", lat: 35.6967, lng: 139.8144, desc: "Nossa base em Sumida. Arcakit (Daiso de 1 andar inteiro), Parco e conexão direta JR/Metrô.", query: "Kinshicho Station Tokyo" },
-                    { nome: "Tokyo Skytree & Solamachi", tipo: "Mirante", icone: "fa-tower-observation", lat: 35.7100, lng: 139.8107, desc: "Torre mais alta do Japão (634m), shopping Solamachi e Pokémon Center Skytree.", query: "Tokyo Skytree" },
-                    { nome: "Templo Senso-ji & Kaminarimon", tipo: "Templo", icone: "fa-torii-gate", lat: 35.7147, lng: 139.7966, desc: "Templo budista mais antigo de Tóquio e lanterna vermelha gigante.", query: "Senso-ji Asakusa Tokyo" },
-                    { nome: "Rua Comercial Nakamise-dori", tipo: "Compras/Doces", icone: "fa-bag-shopping", lat: 35.7125, lng: 139.7964, desc: "Souvenirs tradicionais, Melonpan e petiscos históricos.", query: "Nakamise Shopping Street Asakusa" }
+                    { nome: "The Park両国緑 (Base Hotel Tóquio)", tipo: "Hospedagem", icone: "fa-bed", lat: 35.6952, lng: 139.7965, desc: "Endereço: 1-22-4 Midori, Sumida City. Check-in: 13/01 às 16:00 | Check-out: 22/01 às 10:00 (3 min a pé da estação Ryogoku).", query: "1-22-4 Midori Sumida City Tokyo" },
+                    { nome: "Templo Senso-ji & Nakamise-dori (14/01 - 09:00)", tipo: "Templo", icone: "fa-torii-gate", lat: 35.7147, lng: 139.7966, desc: "Portão Kaminarimon e rua comercial histórica. Transporte de Ryogoku: ¥180.", query: "Senso-ji Asakusa Tokyo" },
+                    { nome: "Tokyo Skytree & Solamachi (14/01)", tipo: "Skyline", icone: "fa-tower-observation", lat: 35.7100, lng: 139.8107, desc: "Torre de 634m e Pokémon Center Skytree Town.", query: "Tokyo Skytree" }
                 ]
             },
             {
                 id: "tk-akiba",
                 cidade: "Tóquio",
-                distrito: "Akihabara, Ochanomizu & Ueno",
-                curto: "Akihabara / Ueno",
-                vibe: "Rua das Guitarras, Eletrônicos, Games & Parque Ueno",
-                corHex: "#2563eb", // Royal Blue
-                corBadge: "bg-blue-100 text-blue-700",
-                estacoes: "Akihabara Sta. / Ochanomizu Sta. (Linha JR Sobu direta de Kinshicho em 6 min!)",
-                dicaLogistica: "O trem amarelo JR Sobu sai de Kinshicho e deixa você direto na porta de Akihabara e Ochanomizu sem baldeação.",
-                center: [35.7060, 139.7710],
-                zoom: 13.8,
-                polygon: [
-                    [35.724, 139.760], [35.724, 139.786], [35.693, 139.785],
-                    [35.693, 139.758], [35.708, 139.756]
-                ],
+                distrito: "Akihabara & Ochanomizu",
+                curto: "Akihabara / Guitarras",
+                vibe: "Eletrônicos, Yodobashi, Games & Rua das Guitarras • Dia 14/01",
+                corHex: "#2563eb",
+                estacoes: "Akihabara Sta. / Ochanomizu Sta. (Apenas 4 a 6 min direto de Ryogoku pela JR Sōbu: ¥150!)",
+                dicaLogistica: "A linha JR Sōbu Local liga Ryogoku a Akihabara (2 paradas) e Ochanomizu (3 paradas) por apenas ¥150 (~R$ 5,70).",
+                center: [35.7000, 139.7710],
+                zoom: 14.2,
+                polygon: [[35.712, 139.760], [35.712, 139.784], [35.692, 139.784], [35.692, 139.760]],
                 pontos: [
-                    { nome: "Ochanomizu Guitar Street", tipo: "Música", icone: "fa-guitar", lat: 35.6995, lng: 139.7640, desc: "Mais de 50 lojas de guitarras, pedais e amplificadores (Ishibashi, Kurosawa, ESP BigBoss).", query: "Ochanomizu Station Tokyo" },
                     { nome: "Yodobashi Camera Multimedia Akiba", tipo: "Eletrônicos", icone: "fa-plug", lat: 35.6987, lng: 139.7747, desc: "Megastore de 9 andares de tecnologia, áudio, ferramentas e brinquedos.", query: "Yodobashi Akiba" },
-                    { nome: "Super Potato & Radio Kaikan (Akihabara)", tipo: "Games/Geek", icone: "fa-gamepad", lat: 35.6996, lng: 139.7706, desc: "Lojas lendárias de retro-games, fliperamas e colecionáveis.", query: "Super Potato Akihabara" },
-                    { nome: "Parque Ueno & Museu Nacional", tipo: "Parque/Cultura", icone: "fa-tree", lat: 35.7147, lng: 139.7734, desc: "Grande parque cultural, templos e museus.", query: "Ueno Park Tokyo" },
-                    { nome: "Mercado Ameyoko", tipo: "Mercado de Rua", icone: "fa-store", lat: 35.7095, lng: 139.7746, desc: "Rua comercial vibrante sob os trilhos do trem entre Ueno e Okachimachi.", query: "Ameyoko Shopping District" }
+                    { nome: "Akihabara Electric Town & Super Potato", tipo: "Geek", icone: "fa-gamepad", lat: 35.6996, lng: 139.7706, desc: "Lojas de retro-games, action figures e componentes.", query: "Akihabara Electric Town" },
+                    { nome: "Ochanomizu Guitar Street", tipo: "Música", icone: "fa-guitar", lat: 35.6995, lng: 139.7640, desc: "Dezenas de lojas de guitarras, pedais e amplificadores lado a lado.", query: "Ochanomizu Station Tokyo" }
+                ]
+            },
+            {
+                id: "tk-ginza",
+                cidade: "Tóquio",
+                distrito: "Ginza & Tokyo Station",
+                curto: "Ginza / Tokyo Sta.",
+                vibe: "Compras Flagship, Papelaria Itoya, Wagyu & Estação Central • Dia 16/01",
+                corHex: "#059669",
+                estacoes: "Tokyo Sta. (10 min de Ryogoku via Akihabara: ¥170) • Ginza Sta.",
+                dicaLogistica: "Vá de Ryogoku até Tokyo Station (¥170) e siga caminhando 10 min até Ginza (ou metrô Marunouchi: ¥180).",
+                center: [35.6745, 139.7655],
+                zoom: 14.2,
+                polygon: [[35.686, 139.755], [35.686, 139.776], [35.664, 139.776], [35.664, 139.755]],
+                pontos: [
+                    { nome: "Tokyo Station (Ramen & Character Street)", tipo: "Estação/Compras", icone: "fa-train", lat: 35.6812, lng: 139.7671, desc: "Jardins do Palácio Imperial, Ramen Street e Character Street.", query: "Tokyo Station" },
+                    { nome: "Uniqlo Ginza Flagship Store", tipo: "Roupa", icone: "fa-shirt", lat: 35.6703, lng: 139.7642, desc: "Salvo na aba Detalhes (Ginza). Loja conceito de 12 andares.", query: "Uniqlo Ginza Flagship Store" },
+                    { nome: "Ginza Itoya", tipo: "Papelaria", icone: "fa-pen-nib", lat: 35.6731, lng: 139.7672, desc: "Salvo na aba Detalhes (Ginza). Papelaria histórica de 12 andares.", query: "Ginza Itoya" },
+                    { nome: "Starbucks Reserve® Store - Ginza", tipo: "Comida", icone: "fa-mug-hot", lat: 35.6696, lng: 139.7656, desc: "Salvo na aba Detalhes (Ginza - Marronnier Dori).", query: "Starbucks Reserve Store Ginza Marronnier Dori" },
+                    { nome: "Godaime Wagyu Tokyo", tipo: "Comida", icone: "fa-utensils", lat: 35.6718, lng: 139.7635, desc: "Salvo na aba Detalhes (Ginza). Especialidade em carne Wagyu.", query: "Godaime Wagyu Tokyo Ginza" },
+                    { nome: "ART AQUARIUM MUSEUM GINZA", tipo: "Museu", icone: "fa-fish", lat: 35.6715, lng: 139.7660, desc: "Salvo na aba Detalhes (Ginza - Mitsukoshi).", query: "Art Aquarium Museum Ginza" }
                 ]
             },
             {
                 id: "tk-shibuya",
                 cidade: "Tóquio",
-                distrito: "Shibuya & Harajuku",
-                curto: "Shibuya / Harajuku",
-                vibe: "Cruzamento Famoso, Nintendo Tokyo & Santuário Meiji",
-                corHex: "#9333ea", // Purple
-                corBadge: "bg-purple-100 text-purple-700",
-                estacoes: "Shibuya Sta. (Linha Hanzomon direta de Kinshicho) • Harajuku Sta.",
-                dicaLogistica: "Pegue a linha roxa (Hanzomon) em Kinshicho e desça direto dentro da estação de Shibuya.",
-                center: [35.6650, 139.7010],
-                zoom: 14,
-                polygon: [
-                    [35.680, 139.688], [35.680, 139.715], [35.652, 139.715],
-                    [35.650, 139.688]
-                ],
+                distrito: "Shibuya, Harajuku, Shinjuku & Nakano",
+                curto: "Shibuya / Shinjuku",
+                vibe: "Cruzamento, Tower Records, Gyukatsu, Becos & Geek • Dias 18 e 21/01",
+                corHex: "#9333ea",
+                estacoes: "Harajuku Sta. (¥230) • Shibuya Sta. • Shinjuku Sta. (Retorno direto p/ Ryogoku via JR Sōbu: ¥230)",
+                dicaLogistica: "No retorno de Shinjuku ou Nakano para o hotel em Ryogoku, pegue o trem amarelo (JR Chūō-Sōbu) direto sem precisar fazer baldeação (¥230)!",
+                center: [35.6850, 139.6980],
+                zoom: 12.6,
+                polygon: [[35.735, 139.660], [35.735, 139.725], [35.654, 139.725], [35.654, 139.660]],
                 pontos: [
-                    { nome: "Shibuya Scramble Crossing & Hachiko", tipo: "Ícone", icone: "fa-users", lat: 35.6595, lng: 139.7004, desc: "O cruzamento mais famoso do mundo e a estátua do cão Hachiko.", query: "Shibuya Scramble Crossing" },
-                    { nome: "Shibuya PARCO (Nintendo & Pokémon)", tipo: "Games", icone: "fa-gamepad", lat: 35.6620, lng: 139.6988, desc: "6º andar com Nintendo Tokyo, Pokémon Center, Capcom Store e Jump Shop.", query: "Shibuya PARCO" },
-                    { nome: "Shibuya Sky", tipo: "Mirante", icone: "fa-cloud-sun", lat: 35.6584, lng: 139.7022, desc: "Observatório 360º a céu aberto no topo do Shibuya Scramble Square.", query: "Shibuya Sky" },
-                    { nome: "Santuário Meiji Jingu", tipo: "Santuário", icone: "fa-torii-gate", lat: 35.6764, lng: 139.6993, desc: "Santuário xintoísta monumental cercado por uma floresta em Harajuku.", query: "Meiji Jingu Tokyo" },
-                    { nome: "Takeshita Street (Harajuku)", tipo: "Cultura Jovem", icone: "fa-ice-cream", lat: 35.6715, lng: 139.7031, desc: "Rua famosa por crepes, doces e moda jovem japonesa.", query: "Takeshita Street Harajuku" }
+                    { nome: "Shibuya Crossing", tipo: "Crossing", icone: "fa-users", lat: 35.6595, lng: 139.7004, desc: "Salvo na aba Detalhes. Cruzamento famoso e estátua do Hachiko.", query: "Shibuya Scramble Crossing" },
+                    { nome: "Shibuya Sky", tipo: "Skyline", icone: "fa-cloud-sun", lat: 35.6584, lng: 139.7022, desc: "Salvo na aba Detalhes. Mirante 360º no Shibuya Scramble Square.", query: "Shibuya Sky" },
+                    { nome: "Shibuya Parco (Nintendo & Pokémon)", tipo: "Geek", icone: "fa-gamepad", lat: 35.6620, lng: 139.6988, desc: "Salvo na aba Detalhes. 6º andar com Nintendo Tokyo e Pokémon Center.", query: "Shibuya PARCO" },
+                    { nome: "Tower Records Shibuya", tipo: "Disco", icone: "fa-compact-disc", lat: 35.6627, lng: 139.7010, desc: "Salvo na aba Detalhes. Megastore lendária de CDs, vinis e rock/metal.", query: "Tower Records Shibuya" },
+                    { nome: "Gyukatsu Motomura Shibuya Branch", tipo: "Comida", icone: "fa-fire-burner", lat: 35.6580, lng: 139.7019, desc: "Salvo na aba Detalhes. Filé bovino empanado na pedra quente.", query: "Gyukatsu Motomura Shibuya" },
+                    { nome: "Menchirashi (Harajuku / Cat Street)", tipo: "Comida", icone: "fa-bowl-food", lat: 35.6665, lng: 139.7052, desc: "Salvo na aba Detalhes. Famoso pelo Carbonara Udon.", query: "Menchirashi Harajuku" },
+                    { nome: "Santuário Meiji (Harajuku)", tipo: "Templo", icone: "fa-torii-gate", lat: 35.6764, lng: 139.6993, desc: "Salvo na aba Detalhes. Floresta sagrada ao lado da estação Harajuku.", query: "Meiji Jingu Tokyo" },
+                    { nome: "Omoide Yokocho Memory Lane (Shinjuku)", tipo: "Comida", icone: "fa-utensils", lat: 35.6930, lng: 139.6995, desc: "Salvo na aba Detalhes. Vielas históricas de yakitori em Shinjuku.", query: "Omoide Yokocho Shinjuku" },
+                    { nome: "Nakano Broadway & Sunshine City (Dia 21/01)", tipo: "Geek/Retrô", icone: "fa-robot", lat: 35.7092, lng: 139.6657, desc: "Roteiro de Quinta-feira (21/01) no Doc: Ikebukuro (¥230) e Nakano Broadway (¥180).", query: "Nakano Broadway" }
                 ]
             },
             {
-                id: "tk-shinjuku",
+                id: "tk-minato",
                 cidade: "Tóquio",
-                distrito: "Shinjuku, Nakano & Ikebukuro",
-                curto: "Shinjuku / Nakano",
-                vibe: "Arranha-céus, Luzes Neon, Godzilla & Colecionáveis",
-                corHex: "#ea580c", // Orange
-                corBadge: "bg-orange-100 text-orange-800",
-                estacoes: "Shinjuku Sta. / Nakano Sta. (Linha JR Chuo-Sobu direta de Kinshicho)",
-                dicaLogistica: "Ótima região para combinar mirante gratuito no fim da tarde e luzes neon de Kabukicho à noite.",
-                center: [35.7050, 139.6950],
+                distrito: "Minato, Tsukiji, Toyosu & Odaiba",
+                curto: "Minato / Odaiba",
+                vibe: "teamLab Planets, Joypolis, Tsukiji & Gundam • Dia 20/01",
+                corHex: "#0284c7",
+                estacoes: "Toyosu Sta. (12 min de Ryogoku: ¥290) • Daiba Sta. (Yurikamome: ¥260)",
+                dicaLogistica: "De Ryogoku pegue a linha Toei Ōedo até Tsukishima + Yurakucho Line até Toyosu (apenas 12 min, ¥290)!",
+                center: [35.6420, 139.7720],
                 zoom: 12.8,
-                polygon: [
-                    [35.736, 139.658], [35.736, 139.728], [35.683, 139.725],
-                    [35.683, 139.658]
-                ],
+                polygon: [[35.668, 139.735], [35.668, 139.798], [35.615, 139.798], [35.615, 139.735]],
                 pontos: [
-                    { nome: "Godzilla Head & Kabukicho", tipo: "Ícone", icone: "fa-dragon", lat: 35.6950, lng: 139.7021, desc: "Cabeça gigante do Godzilla no terraço do Hotel Gracery Shinjuku.", query: "Godzilla Head Shinjuku" },
-                    { nome: "Tokyo Metropolitan Government Building", tipo: "Mirante Grátis", icone: "fa-building", lat: 35.6896, lng: 139.6917, desc: "Observatório gratuito no 45º andar e projeção mapeada noturna.", query: "Tokyo Metropolitan Government Building" },
-                    { nome: "Omoide Yokocho (Shinjuku)", tipo: "Gastronomia", icone: "fa-utensils", lat: 35.6930, lng: 139.6995, desc: "Vielas históricas iluminadas por lanternas com barracas de yakitori.", query: "Omoide Yokocho Shinjuku" },
-                    { nome: "Nakano Broadway", tipo: "Retrô/Geek", icone: "fa-robot", lat: 35.7092, lng: 139.6657, desc: "Shopping tradicional com dezenas de lojas Mandarake e itens raros.", query: "Nakano Broadway" },
-                    { nome: "Sunshine City (Ikebukuro)", tipo: "Shopping/Pokemon", icone: "fa-star", lat: 35.7289, lng: 139.7196, desc: "Complexo com Pokémon Center Mega Tokyo e maior loja de Gashapon.", query: "Sunshine City Ikebukuro" }
+                    { nome: "TSUKIJI FISH MARKET", tipo: "Comida", icone: "fa-shrimp", lat: 35.6655, lng: 139.7707, desc: "Salvo na aba Detalhes (Minato/Tsukiji). Mercado gastronômico de rua.", query: "Tsukiji Outer Market" },
+                    { nome: "teamLab Planets TOKYO (Toyosu)", tipo: "Arte Imersiva", icone: "fa-wand-magic-sparkles", lat: 35.6491, lng: 139.7898, desc: "Quarta-feira (20/01). Acesso de Ryogoku em 12 min (¥290).", query: "teamLab Planets TOKYO" },
+                    { nome: "Tokyo Joypolis (Odaiba)", tipo: "Geek", icone: "fa-vr-cardboard", lat: 35.6285, lng: 139.7768, desc: "Salvo na aba Detalhes. Parque indoor da SEGA em Odaiba.", query: "Tokyo Joypolis" },
+                    { nome: "UWS Aquarium GA☆KYO (Odaiba)", tipo: "Diversão", icone: "fa-water", lat: 35.6275, lng: 139.7735, desc: "Salvo na aba Detalhes (Aqua City Odaiba).", query: "UWS Aquarium GAKYO Odaiba" },
+                    { nome: "Telecom Center Observatory", tipo: "Observatório", icone: "fa-binoculars", lat: 35.6176, lng: 139.7793, desc: "Salvo na aba Detalhes. Mirante panorâmico da baía de Tóquio.", query: "Telecom Center Observatory Tokyo" },
+                    { nome: "MoN Takanawa: The Museum of Narratives", tipo: "Museu", icone: "fa-landmark", lat: 35.6355, lng: 139.7408, desc: "Salvo na aba Detalhes (Minato - Takanawa Gateway).", query: "Takanawa Gateway Station" }
                 ]
             },
             {
-                id: "tk-centro",
+                id: "tk-arredores",
                 cidade: "Tóquio",
-                distrito: "Chiyoda, Ginza & Minato",
-                curto: "Ginza / Centro",
-                vibe: "Tokyo Station, Palácio Imperial, Flagships & Torre de Tóquio",
-                corHex: "#059669", // Emerald Green
-                corBadge: "bg-emerald-100 text-emerald-800",
-                estacoes: "Tokyo Sta. (8 min de Kinshicho pela JR Sobu Rapid) • Ginza Sta.",
-                dicaLogistica: "A Tokyo Station tem a famosa Ramen Street e a Character Street no subsolo.",
-                center: [35.6720, 139.7580],
-                zoom: 13.5,
-                polygon: [
-                    [35.691, 139.740], [35.691, 139.780], [35.654, 139.776],
-                    [35.654, 139.740]
-                ],
+                distrito: "Bate-voltas: Monte Fuji, Yokohama & DisneySea",
+                curto: "Fuji / Yokohama / Disney",
+                vibe: "Dias 15/01 (Kawaguchiko), 17/01 (Yokohama) e 19/01 (DisneySea)",
+                corHex: "#d97706",
+                estacoes: "Shinjuku Sta. (¥230) • Yokohama Sta. (¥1.240 i/v) • Maihama Sta. (¥640 i/v)",
+                dicaLogistica: "Para o DisneySea (19/01): Ryogoku ➔ Tokyo Sta (10 min) ➔ JR Keiyo Line até Maihama (15 min, ¥320/trecho) + Monotrilho Disney (¥300).",
+                center: [35.5800, 139.7600],
+                zoom: 10,
+                polygon: [[35.645, 139.870], [35.645, 139.900], [35.615, 139.900], [35.615, 139.870]],
                 pontos: [
-                    { nome: "Tokyo Station (Ramen & Character Street)", tipo: "Gastronomia/Lojas", icone: "fa-train", lat: 35.6812, lng: 139.7671, desc: "Ramen Street com os melhores ramens do Japão e lojas oficiais de personagens.", query: "Tokyo Character Street" },
-                    { nome: "Jardins do Palácio Imperial", tipo: "História", icone: "fa-landmark", lat: 35.6852, lng: 139.7528, desc: "Antigo Castelo Edo, pontes históricas e jardins imperiais.", query: "Imperial Palace East Gardens" },
-                    { nome: "Ginza (Uniqlo Flagship & Itoya)", tipo: "Compras", icone: "fa-bag-shopping", lat: 35.6712, lng: 139.7650, desc: "Uniqlo de 12 andares, papelaria gigante Itoya e Nissan Crossing.", query: "Uniqlo Ginza" },
-                    { nome: "Torre de Tóquio & Templo Zojo-ji", tipo: "Cartão-Postal", icone: "fa-broadcast-tower", lat: 35.6586, lng: 139.7454, desc: "A clássica torre vermelha e branca vista do pátio do templo Zojo-ji.", query: "Tokyo Tower" }
-                ]
-            },
-            {
-                id: "tk-odaiba",
-                cidade: "Tóquio",
-                distrito: "Odaiba & Toyosu (Baía)",
-                curto: "Odaiba / Baía",
-                vibe: "Arte Digital Imersiva, Gundam em Tamanho Real & Baía",
-                corHex: "#0284c7", // Sky Blue
-                corBadge: "bg-sky-100 text-sky-800",
-                estacoes: "Toyosu Sta. / Daiba Sta. (Monotrilho Yurikamome)",
-                dicaLogistica: "Vá no primeiro vagão do monotrilho automático Yurikamome para ter a vista panorâmica da Rainbow Bridge.",
-                center: [35.6350, 139.7820],
-                zoom: 13.5,
-                polygon: [
-                    [35.653, 139.768], [35.653, 139.805], [35.618, 139.805],
-                    [35.618, 139.768]
-                ],
-                pontos: [
-                    { nome: "teamLab Planets TOKYO (Toyosu)", tipo: "Arte Imersiva", icone: "fa-wand-magic-sparkles", lat: 35.6491, lng: 139.7898, desc: "Museu digital onde você caminha descalço pela água e salas de luz.", query: "teamLab Planets TOKYO" },
-                    { nome: "Unicorn Gundam & DiverCity Plaza", tipo: "Cultura Pop", icone: "fa-robot", lat: 35.6247, lng: 139.7755, desc: "Gundam de 19,7m em tamanho real e loja Gundam Base.", query: "Unicorn Gundam Statue Odaiba" },
-                    { nome: "Orla de Odaiba & Estátua da Liberdade", tipo: "Vista", icone: "fa-camera", lat: 35.6279, lng: 139.7718, desc: "Vista linda da Rainbow Bridge e do skyline de Tóquio.", query: "Odaiba Statue of Liberty" }
+                    { nome: "Monte Fuji / Kawaguchiko (15/01)", tipo: "Paisagem", icone: "fa-mountain-sun", lat: 35.4982, lng: 138.7686, desc: "JR Sōbu até Shinjuku (¥230) + Highway Bus Busta Shinjuku (¥4.400 ida/volta) ou Fuji Excursion (¥8.260).", query: "Kawaguchiko Station" },
+                    { nome: "Yokohama: Minato Mirai & Chinatown (17/01)", tipo: "Bate-volta", icone: "fa-anchor", lat: 35.4536, lng: 139.6380, desc: "Ryogoku ➔ Akihabara/Tokyo + JR Ueno-Tokyo/Tokaido Line (~40 min, ¥1.240 ida/volta).", query: "Minato Mirai Yokohama" },
+                    { nome: "Tokyo DisneySea (19/01)", tipo: "Parque", icone: "fa-wand-sparkles", lat: 35.6267, lng: 139.8851, desc: "Trem JR até Maihama (¥640 ida/volta) + Monotrilho Disney Resort Line (¥300).", query: "Tokyo DisneySea" }
                 ]
             },
 
-            // ==================== OSAKA (3 DISTRITOS) ====================
+            // ==================== OSAKA ====================
             {
                 id: "os-minami",
                 cidade: "Osaka",
-                distrito: "Minami (Namba, Dotonbori & Shinsekai)",
+                distrito: "Namba South, Motomachi, Shinsaibashi & Dotonbori",
                 curto: "Namba / Dotonbori",
-                vibe: "Nossa Base em Osaka • Comida de Rua, Letreiros 3D & Geek",
+                vibe: "Base ESLEAD Namba South I / Welina (24 a 28/01) • Templo Leão & Canal",
                 corHex: "#e11d48",
-                corBadge: "bg-rose-100 text-rose-700",
-                estacoes: "Ebisucho Sta. / Dobutsuen-mae Sta. / Namba Sta.",
-                dicaLogistica: "Nosso hotel (Eslead Namba South I) fica ao lado da Torre Tsutenkaku (Shinsekai) e permite ir caminhando até Den Den Town e Dotonbori!",
-                center: [34.6590, 135.5040],
+                estacoes: "Shin-Imamiya Sta. (5 min a pé) • Dobutsuen-mae / Ebisucho • Namba Sta.",
+                dicaLogistica: "Para ir à USJ (26/01): caminhar 5 min até Shin-Imamiya ➔ JR Loop Line até Nishikujo ➔ JR Yumesaki até Universal City (25 min, ¥190 ou coberto pelo passe!).",
+                center: [34.6620, 135.5020],
                 zoom: 14,
-                polygon: [
-                    [34.674, 135.492], [34.674, 135.515], [34.645, 135.515], [34.645, 135.492]
-                ],
+                polygon: [[34.678, 135.490], [34.678, 135.512], [34.646, 135.512], [34.646, 135.490]],
                 pontos: [
-                    { nome: "Eslead Hotel Namba South I (Base)", tipo: "Hospedagem", icone: "fa-bed", lat: 34.6508, lng: 135.5050, desc: "Nossa hospedagem em Osaka, colada na estação Ebisucho e na Torre Tsutenkaku.", query: "Eslead Hotel Namba South I" },
-                    { nome: "Shinsekai & Torre Tsutenkaku", tipo: "Retrô/Comida", icone: "fa-tower-cell", lat: 34.6525, lng: 135.5063, desc: "Bairro retrô vizinho ao hotel, famoso pelos letreiros coloridos e Kushikatsu.", query: "Tsutenkaku Shinsekai" },
-                    { nome: "Den Den Town (Nipponbashi)", tipo: "Games/Eletrônicos", icone: "fa-gamepad", lat: 34.6595, lng: 135.5056, desc: "A 'Akihabara de Osaka' para retro-games, figures, Gundam e eletrônicos.", query: "Nipponbashi Denden Town" },
-                    { nome: "Dotonbori & Letreiro Glico Man", tipo: "Ícone/Gastronomia", icone: "fa-utensils", lat: 34.6687, lng: 135.5013, desc: "O canal mais famoso de Osaka, repleto de Takoyaki e Okonomiyaki.", query: "Dotonbori Glico Sign" },
-                    { nome: "Mercado Kuromon Ichiba", tipo: "Mercado", icone: "fa-fish", lat: 34.6654, lng: 135.5065, desc: "Mercado coberto tradicional com frutos do mar grelhados e Wagyu.", query: "Kuromon Market Osaka" }
+                    { nome: "ESLEAD HOTEL Namba South I (Base Doc)", tipo: "Hotel", icone: "fa-bed", lat: 34.6508, lng: 135.5050, desc: "Check-in 24/01 às 16:00 | Check-out 28/01 às 10:00. A 5 min da estação Shin-Imamiya e de Shinsekai.", query: "ESLEAD HOTEL Namba South I" },
+                    { nome: "Welina Hotel Premier Shinsaibashi (Aba Detalhes)", tipo: "Hotel", icone: "fa-hotel", lat: 34.6702, lng: 135.5032, desc: "Salvo na aba Detalhes (Motomachi / Shinsaibashi, Osaka).", query: "Welina Hotel Premier Shinsaibashi" },
+                    { nome: "Namba Yasaka Jinja (Cabeça de Leão)", tipo: "Templo", icone: "fa-torii-gate", lat: 34.6614, lng: 135.4965, desc: "Salvo na aba Detalhes (Motomachi, Osaka). Palco gigante em formato de leão.", query: "Namba Yasaka Jinja" },
+                    { nome: "Dotonbori, Shinsekai & Den Den Town", tipo: "Gastronomia/Geek", icone: "fa-utensils", lat: 34.6687, lng: 135.5013, desc: "Letreiro Glico Man, Takoyaki e rua geek Nipponbashi (compras na manhã de 28/01).", query: "Dotonbori Glico Sign" }
                 ]
             },
             {
-                id: "os-kita",
+                id: "os-castelo",
                 cidade: "Osaka",
-                distrito: "Chuo (Castelo) & Kita (Umeda)",
-                curto: "Castelo / Umeda",
-                vibe: "História Samurai & Arranha-céus Futuristas",
+                distrito: "Shin-Osaka (Minn) & Castelo de Osaka",
+                curto: "Shin-Osaka / Castelo",
+                vibe: "Hotel Minn Shin-Osaka (12/01) & Partida Shinkansen (13/01 e 25/01)",
                 corHex: "#2563eb",
-                corBadge: "bg-blue-100 text-blue-700",
-                estacoes: "Osakajokoen Sta. • Umeda / Osaka Sta. (Midosuji Line)",
-                dicaLogistica: "A linha vermelha Midosuji leva direto de Dobutsuen-mae/Namba até Umeda.",
-                center: [34.6950, 135.5100],
-                zoom: 13,
-                polygon: [
-                    [34.712, 135.482], [34.712, 135.538], [34.680, 135.538], [34.680, 135.482]
-                ],
+                estacoes: "Shin-Osaka Sta. (Shinkansen + Midosuji Line) • Osakajokoen Sta.",
+                dicaLogistica: "Na chegada (12/01): Limousine Bus de Itami até Shin-Osaka (¥510) e metrô Midosuji p/ Namba (¥290).",
+                center: [34.7100, 135.5120],
+                zoom: 12.5,
+                polygon: [[34.740, 135.490], [34.740, 135.535], [34.682, 135.535], [34.682, 135.490]],
                 pontos: [
-                    { nome: "Castelo de Osaka (Osaka-jo)", tipo: "Castelo", icone: "fa-chess-rook", lat: 34.6873, lng: 135.5262, desc: "Um dos castelos mais famosos do Japão, cercado por fossos e jardins.", query: "Osaka Castle" },
-                    { nome: "Umeda Sky Building", tipo: "Mirante", icone: "fa-building", lat: 34.7055, lng: 135.4896, desc: "Observatório do Jardim Flutuante com escada rolante panorâmica.", query: "Umeda Sky Building" }
+                    { nome: "Minn Shin-Osaka (Hotel 12/01 a 13/01)", tipo: "Hospedagem", icone: "fa-bed", lat: 34.7325, lng: 135.4985, desc: "Hospedagem da 1ª noite (Check-out 13/01 às 10:00) ao lado da estação do Shinkansen.", query: "Minn Shin-Osaka" },
+                    { nome: "Castelo de Osaka & Umeda (13/01 Manhã)", tipo: "História", icone: "fa-chess-rook", lat: 34.6873, lng: 135.5262, desc: "Passeio matinal antes do Shinkansen das 12:00 p/ Tóquio (JR Loop Line / Metrô: ¥190~¥240).", query: "Osaka Castle" }
                 ]
             },
             {
-                id: "os-baia",
+                id: "os-usj",
                 cidade: "Osaka",
-                distrito: "Baía de Osaka (USJ & Kaiyukan)",
-                curto: "Universal / Baía",
-                vibe: "Super Nintendo World, Harry Potter & Aquário",
+                distrito: "Universal Studios Japan & Baía (26 e 27/01)",
+                curto: "Universal (USJ)",
+                vibe: "Super Nintendo World, Harry Potter & Aquário Kaiyukan",
                 corHex: "#9333ea",
-                corBadge: "bg-purple-100 text-purple-700",
-                estacoes: "Universal City Sta. • Osakako Sta.",
-                dicaLogistica: "Saia de Shin-Imamiya (perto do hotel) pela JR Loop Line até Nishikujo e conecte na linha da Universal (~20 min).",
-                center: [34.6600, 135.4320],
-                zoom: 13.5,
-                polygon: [
-                    [34.675, 135.415], [34.675, 135.450], [34.646, 135.450], [34.646, 135.415]
-                ],
+                estacoes: "Universal City Sta. (25 min de Shin-Imamiya via Nishikujo: ¥190 ou JR Pass)",
+                dicaLogistica: "Dias 26 e 27/01 reservados para USJ e atrações complementares de Osaka.",
+                center: [34.6654, 135.4323],
+                zoom: 14,
+                polygon: [[34.675, 135.420], [34.675, 135.445], [34.655, 135.445], [34.655, 135.420]],
                 pontos: [
-                    { nome: "Universal Studios Japan (USJ)", tipo: "Parque", icone: "fa-wand-sparkles", lat: 34.6654, lng: 135.4323, desc: "Super Nintendo World, Harry Potter e atrações principais.", query: "Universal Studios Japan" },
-                    { nome: "Aquário de Osaka (Kaiyukan)", tipo: "Família", icone: "fa-water", lat: 34.6545, lng: 135.4290, desc: "Um dos maiores aquários do mundo e roda-gigante Tempozan.", query: "Osaka Aquarium Kaiyukan" }
+                    { nome: "Universal Studios Japan (26 e 27/01)", tipo: "Parque", icone: "fa-wand-sparkles", lat: 34.6654, lng: 135.4323, desc: "Acesso pela JR Loop Line + JR Yumesaki Line (coberto pelo passe JR Kansai-Hiroshima).", query: "Universal Studios Japan" }
                 ]
             },
 
-            // ==================== QUIOTO (2 DISTRITOS) ====================
+            // ==================== QUIOTO & NAGAHAMA ====================
             {
-                id: "ky-leste",
+                id: "ky-nagahama",
                 cidade: "Quioto",
-                distrito: "Fushimi & Higashiyama (Gion)",
-                curto: "Fushimi / Gion",
-                vibe: "Portões Torii Vermelhos & Ruas Históricas de Madeira",
+                distrito: "Nagahama (Shiga) & Quioto (Dias 22 a 24/01)",
+                curto: "Nagahama & Quioto",
+                vibe: "Lago Biwa (22 e 23/01) & Templos de Quioto a caminho de Osaka (24/01)",
                 corHex: "#e11d48",
-                corBadge: "bg-rose-100 text-rose-700",
-                estacoes: "Inari Sta. (JR) / Fushimi-Inari Sta. (Keihan) • Gion-Shijo Sta.",
-                dicaLogistica: "A linha Keihan conecta Osaka direto a Fushimi Inari e depois a Gion/Kiyomizu-dera.",
-                center: [34.9850, 135.7750],
-                zoom: 13,
-                polygon: [
-                    [35.014, 135.760], [35.014, 135.792], [34.960, 135.792], [34.960, 135.760]
-                ],
+                estacoes: "Nagahama Sta. ➔ Kyoto Sta. (JR Special Rapid Biwako Line: 1h10, ¥1.340)",
+                dicaLogistica: "Em 24/01: JR Special Rapid de Nagahama p/ Kyoto (08:30-09:30), Fushimi Inari (JR Nara Line: ¥150) + Gion (Keihan: ¥220) e descida p/ Osaka às 16:00!",
+                center: [35.1800, 135.9800],
+                zoom: 9.8,
+                polygon: [[35.420, 136.220], [35.420, 136.320], [35.340, 136.320], [35.340, 136.220]],
                 pontos: [
-                    { nome: "Santuário Fushimi Inari Taisha", tipo: "Santuário", icone: "fa-torii-gate", lat: 34.9671, lng: 135.7727, desc: "Caminhada pelos milhares de portões Torii vermelhos na montanha.", query: "Fushimi Inari Taisha" },
-                    { nome: "Templo Kiyomizu-dera & Sannenzaka", tipo: "Templo UNESCO", icone: "fa-gopuram", lat: 34.9949, lng: 135.7850, desc: "Famoso templo de madeira e ladeiras históricas preservadas.", query: "Kiyomizu-dera Kyoto" },
-                    { nome: "Distrito de Gion & Hanamikoji", tipo: "Histórico", icone: "fa-star", lat: 35.0037, lng: 135.7756, desc: "Bairro tradicional de casas de chá e arquitetura clássica.", query: "Gion Kyoto" }
+                    { nome: "Nagahama: Castelo, Kurokabe Square & Lago Biwa", tipo: "Histórico/Lago", icone: "fa-water", lat: 35.3773, lng: 136.2662, desc: "Dias 22 e 23/01. Chegada de Tóquio via Shinkansen Hikari até Maibara + JR (¥12.870).", query: "Kurokabe Square Nagahama" },
+                    { nome: "Quioto: Fushimi Inari Taisha & Kiyomizu-dera / Gion", tipo: "Templos", icone: "fa-torii-gate", lat: 34.9671, lng: 135.7727, desc: "Domingo (24/01 das 09:30 às 15:30) antes de seguir para o check-in em Osaka.", query: "Fushimi Inari Taisha" }
                 ]
             },
+
+            // ==================== HIROSHIMA ====================
             {
-                id: "ky-oeste",
-                cidade: "Quioto",
-                distrito: "Arashiyama & Kinkaku-ji",
-                curto: "Arashiyama / Ouro",
-                vibe: "Floresta de Bambu & Pavilhão Dourado",
-                corHex: "#d97706",
-                corBadge: "bg-amber-100 text-amber-800",
-                estacoes: "Saga-Arashiyama Sta. (JR)",
-                dicaLogistica: "Região oeste e norte de Quioto.",
-                center: [35.0280, 135.7000],
-                zoom: 12.5,
-                polygon: [
-                    [35.048, 135.660], [35.048, 135.740], [35.005, 135.740], [35.005, 135.660]
-                ],
+                id: "hi-paz",
+                cidade: "Hiroshima",
+                distrito: "Hiroshima & Ilha de Miyajima (Dia 25/01)",
+                curto: "Hiroshima / Miyajima",
+                vibe: "Bate-volta Shinkansen Nozomi/Mizuho (1h25) + Ferry JR Miyajima",
+                corHex: "#ea580c",
+                estacoes: "Shin-Osaka ➔ Hiroshima (08:15-09:40) • JR Sanyo Line até Miyajimaguchi (25 min)",
+                dicaLogistica: "100% coberto pelo JR Kansai-Hiroshima Area Pass (economizando os ¥21.400 que custaria o Shinkansen avulso + balsa!).",
+                center: [34.3450, 132.3850],
+                zoom: 11.2,
+                polygon: [[34.415, 132.290], [34.415, 132.480], [34.280, 132.480], [34.280, 132.290]],
                 pontos: [
-                    { nome: "Floresta de Bambu de Arashiyama", tipo: "Natureza", icone: "fa-leaf", lat: 35.0168, lng: 135.6713, desc: "Caminho icônico cercado por bambuzais gigantes e Ponte Togetsukyo.", query: "Arashiyama Bamboo Grove" },
-                    { nome: "Kinkaku-ji (Pavilhão Dourado)", tipo: "Templo UNESCO", icone: "fa-sun", lat: 35.0394, lng: 135.7292, desc: "Templo zen recoberto de folhas de ouro refletido no lago.", query: "Kinkaku-ji Kyoto" }
+                    { nome: "Parque Memorial da Paz & Cúpula da Bomba Atômica", tipo: "História", icone: "fa-dove", lat: 34.3955, lng: 132.4536, desc: "Segunda-feira (25/01 das 10:00 às 17:00).", query: "Hiroshima Peace Memorial Park" },
+                    { nome: "Ilha de Miyajima & Santuário Itsukushima", tipo: "Santuário", icone: "fa-torii-gate", lat: 34.2960, lng: 132.3198, desc: "Trem JR Sanyo (25 min) + Ferry JR Miyajima (ambos inclusos no passe!).", query: "Itsukushima Shrine Miyajima" }
                 ]
             }
         ];
 
         // -------------------------------------------------------------------------
-        // 2. LOGICA DO MAPA INTERATIVO (FUNDO ILUSTRADO + FUNDO ESRI SEM API KEY)
+        // 3. CRONOGRAMA COMPLETO INTEGRADO COM O GOOGLE DOC "JAPÃO - INTINERÁRIO"
+        // -------------------------------------------------------------------------
+        const defaultTimelineData = [
+            {
+                id: "dia-10", diaMes: "10", dataCompleta: "10/Jan/2027", diaSemana: "Domingo",
+                cidade: "Fase 1", badge: "Fase 1 • Embarque", titulo: "Saída do Brasil: Jaguaruna ➔ Guarulhos ➔ EUA",
+                hospedagem: "Em trânsito internacional",
+                atividades: [
+                    { hora: "17:35 - 19:15", local: "Voo Jaguaruna (JJG) ➔ Guarulhos (GRU)", desc: "Voo doméstico confirmado.", transporte: "Traslado local até o aeroporto de Jaguaruna", mapQuery: "Aeroporto Regional de Jaguaruna" },
+                    { hora: "19:15 - 23:15", local: "Conexão e Imigração em Guarulhos (GRU)", desc: "Despacho/imigração no Terminal 3.", transporte: "Terminal 3 GRU", mapQuery: "Aeroporto Internacional de Guarulhos Terminal 3" },
+                    { hora: "23:00", local: "Voo Internacional AA / JAL (GRU ➔ JFK)", desc: "Voo JL7201 confirmado rumo a Nova York (Reserva AP5HZU).", transporte: "Boeing 787-9 • Duração 9h50m", mapQuery: "John F. Kennedy International Airport" }
+                ]
+            },
+            {
+                id: "dia-11", diaMes: "11", dataCompleta: "11/Jan/2027", diaSemana: "Segunda-feira",
+                cidade: "Fase 1", badge: "Fase 1 • Conexão EUA", titulo: "Conexão em Nova York (JFK) ➔ Tóquio Haneda",
+                hospedagem: "Cruzando a Linha Internacional de Data",
+                atividades: [
+                    { hora: "06:50", local: "Desembarque em Nova York (JFK - Terminal 8)", desc: "Imigração americana e conexão entre terminais.", transporte: "Conexão interna no aeroporto JFK", mapQuery: "JFK Airport Terminal 8" },
+                    { hora: "09:55", local: "Voo Internacional JAL (JFK ➔ Haneda HND)", desc: "Voo confirmado rumo ao Japão.", transporte: "Japan Airlines", mapQuery: "Haneda Airport" }
+                ]
+            },
+            {
+                id: "dia-12", diaMes: "12", dataCompleta: "12/Jan/2027", diaSemana: "Terça-feira",
+                cidade: "Fase 1", badge: "Chegada • Osaka", titulo: "Chegada em Haneda ➔ Voo p/ Itami & Noite em Osaka",
+                hospedagem: "Minn Shin-Osaka (Chegada ~20:00)",
+                atividades: [
+                    { hora: "14:35", local: "Desembarque em Tóquio Haneda (HND)", desc: "Imigração, retirada de malas e ativação de eSIM / IC Card (Suica/Pasmo).", transporte: "Conexão doméstica em Haneda", mapQuery: "Haneda Airport" },
+                    { hora: "18:05 - 19:15", local: "Voo Doméstico JAL: Haneda (HND) ➔ Osaka Itami (ITM)", desc: "Voo confirmado para Osaka.", transporte: "Voo JAL doméstico (1h10)", mapQuery: "Osaka Itami Airport" },
+                    { hora: "19:30 - 20:15", local: "Aeroporto Itami ➔ Hotel Minn Shin-Osaka", desc: "Check-in no hotel em Shin-Osaka.", transporte: "Osaka Airport Limousine Bus direto p/ Shin-Osaka (~25-30 min) • ¥510 (~R$ 19,50)/pessoa", mapQuery: "Minn Shin-Osaka" },
+                    { hora: "Noite", local: "Jantar e Passeio Rápido em Dotonbori / Shinsekai", desc: "Primeira noite gastronômica em Osaka.", transporte: "Metrô Linha Midosuji (Shin-Osaka ➔ Namba): ¥290 (~R$ 11,00)", mapQuery: "Dotonbori Osaka" }
+                ]
+            },
+            {
+                id: "dia-13", diaMes: "13", dataCompleta: "13/Jan/2027", diaSemana: "Quarta-feira",
+                cidade: "Tóquio", badge: "Fase 2 • Shinkansen", titulo: "Castelo de Osaka ➔ Shinkansen p/ Tóquio ➔ Check-in Ryogoku",
+                hospedagem: "The Park両国緑 (Entrada: 16:00 | 1-22-4 Midori, Sumida)",
+                atividades: [
+                    { hora: "09:00 - 11:30", local: "Check-out Minn Shin-Osaka (até 10:00) & Castelo de Osaka", desc: "Passeio rápido por Umeda ou Castelo de Osaka pela manhã.", transporte: "Linha JR Loop Line / Metrô: ¥190 a ¥240 (~R$ 8,00)", mapQuery: "Osaka Castle" },
+                    { hora: "12:00 - 14:30", local: "Shinkansen Nozomi: Shin-Osaka ➔ Tokyo Station", desc: "Dica: Reservar assentos no lado direito (Fileira E) para ver o Monte Fuji!", transporte: "Trem-bala Nozomi (2h30) • ¥14.720 (~R$ 560,00)/pessoa", mapQuery: "Shin-Osaka Station" },
+                    { hora: "14:45 - 15:20", local: "Deslocamento: Tokyo Station ➔ The Park両国緑 (Ryogoku)", desc: "Chegada na nossa base em Sumida City.", transporte: "JR Yamanote até Akihabara (4 min) + JR Chūō-Sōbu até Ryogoku Sta (4 min) + 3 min a pé • ¥170 (~R$ 6,50)", mapQuery: "1-22-4 Midori Sumida City Tokyo" },
+                    { hora: "16:00", local: "Check-in no The Park両国緑 & Noite em Ryogoku / Yodobashi", desc: "Explorar a terra do sumô (culinária chanko nabe) e Yodobashi Akiba.", transporte: "JR Sōbu (Ryogoku ➔ Akihabara: 4 min)", mapQuery: "Ryogoku Station Tokyo" }
+                ]
+            },
+            {
+                id: "dia-14", diaMes: "14", dataCompleta: "14/Jan/2027", diaSemana: "Quinta-feira",
+                cidade: "Tóquio", badge: "Fase 3 • Tóquio", titulo: "Asakusa, Tokyo Skytree & Akihabara / Ochanomizu",
+                hospedagem: "The Park両国緑 (Ryogoku)",
+                atividades: [
+                    { hora: "09:00 - 12:30", local: "Asakusa (Templo Senso-ji & Nakamise-dori)", desc: "Portão Kaminarimon e comércio tradicional.", transporte: "Ryogoku ➔ Asakusa (Linha Toei Asakusa em Kuramae ou Ônibus Toei direto): ¥180 (~R$ 7,00)", mapQuery: "Senso-ji Asakusa Tokyo" },
+                    { hora: "12:30 - 15:30", local: "Tokyo Skytree & Shopping Solamachi", desc: "Almoço, Pokémon Center e observatório.", transporte: "Caminhada pela ponte Sumida River Walk ou 1 parada de metrô: ¥180", mapQuery: "Tokyo Skytree" },
+                    { hora: "15:30 - 20:00", local: "Akihabara & Ochanomizu (Eletrônicos, Games e Rua das Guitarras)", desc: "Yodobashi Akiba, Super Potato e lojas de instrumentos em Ochanomizu.", transporte: "Linha JR Sōbu Local (Ryogoku ➔ Akihabara/Ochanomizu, 4 a 6 min direto): ¥150 (~R$ 5,70)", mapQuery: "Ochanomizu Station Tokyo" }
+                ]
+            },
+            {
+                id: "dia-15", diaMes: "15", dataCompleta: "15/Jan/2027", diaSemana: "Sexta-feira",
+                cidade: "Tóquio", badge: "Fase 3 • Bate-volta", titulo: "Bate-volta Monte Fuji (Lago Kawaguchiko & Pagode Chureito)",
+                hospedagem: "The Park両国緑 (Ryogoku)",
+                atividades: [
+                    { hora: "07:30", local: "Conexão da Base: Ryogoku ➔ Shinjuku Station", desc: "Acesso direto sem baldeação.", transporte: "Linha JR Chūō-Sōbu direto de Ryogoku até Shinjuku (~20 min) • ¥230", mapQuery: "Busta Shinjuku" },
+                    { hora: "09:00 - 18:00", local: "Região dos Cinco Lagos / Kawaguchiko & Pagode Chureito", desc: "Dia inteiro contemplando o Monte Fuji.", transporte: "Opção B (Melhor Custo-Benefício): Highway Bus no Busta Shinjuku (~1h45) = ¥4.400 (~R$ 167) i/v | Opção A: Trem Fuji Excursion (~1h55) = ¥8.260 (~R$ 314) i/v", mapQuery: "Kawaguchiko Station" }
+                ]
+            },
+            {
+                id: "dia-16", diaMes: "16", dataCompleta: "16/Jan/2027", diaSemana: "Sábado",
+                cidade: "Tóquio", badge: "Fase 3 • Tóquio", titulo: "Tokyo Station & Ginza (Uniqlo 12 andares, Itoya & Wagyu)",
+                hospedagem: "The Park両国緑 (Ryogoku)",
+                atividades: [
+                    { hora: "10:00 - 14:00", local: "Tokyo Station (Palácio Imperial, Ramen Street & Character Street)", desc: "Jardins imperiais e almoço na famosa Ramen Street.", transporte: "Ryogoku ➔ Akihabara (JR Sōbu) + JR Yamanote até Tokyo Sta (total 10 min): ¥170 (~R$ 6,50)", mapQuery: "Tokyo Station" },
+                    { hora: "14:30 - 19:30", local: "Ginza (Uniqlo Flagship, Papelaria Itoya, Art Aquarium & Starbucks Reserve)", desc: "Visitar todos os pontos de Ginza salvos na aba Detalhes.", transporte: "Caminhada de 10 min da Tokyo Station ou Metrô Marunouchi: ¥180", mapQuery: "Uniqlo Ginza Flagship Store" }
+                ]
+            },
+            {
+                id: "dia-17", diaMes: "17", dataCompleta: "17/Jan/2027", diaSemana: "Domingo",
+                cidade: "Tóquio", badge: "Fase 3 • Bate-volta", titulo: "Bate-volta Yokohama (Minato Mirai, Chinatown & Museu do Ramen)",
+                hospedagem: "The Park両国緑 (Ryogoku)",
+                atividades: [
+                    { hora: "08:00 - 19:00", local: "Minato Mirai, Chinatown de Yokohama, Red Brick Warehouse e Museu do Ramen", desc: "Domingo explorando a cidade portuária de Yokohama.", transporte: "Ryogoku ➔ Akihabara/Tokyo Sta + Linha JR Ueno-Tokyo / Tokaido direto até Yokohama (~40 min) • ~¥1.240 (~R$ 47,00) ida e volta", mapQuery: "Minato Mirai Yokohama" }
+                ]
+            },
+            {
+                id: "dia-18", diaMes: "18", dataCompleta: "18/Jan/2027", diaSemana: "Segunda-feira",
+                cidade: "Tóquio", badge: "Fase 3 • Tóquio", titulo: "Harajuku, Shibuya & Shinjuku",
+                hospedagem: "The Park両国緑 (Ryogoku)",
+                atividades: [
+                    { hora: "09:00 - 12:30", local: "Harajuku, Santuário Meiji Jingu & Menchirashi", desc: "Floresta de Meiji Jingu e Takeshita Street.", transporte: "Ryogoku ➔ JR Sōbu até Ochanomizu + JR Yamanote até Harajuku: ¥230 (~R$ 8,70)", mapQuery: "Meiji Jingu Tokyo" },
+                    { hora: "12:30 - 16:30", local: "Shibuya (Scramble Crossing, Hachiko, PARCO, Tower Records, Gyukatsu & Shibuya Sky)", desc: "Pontos salvos da aba Detalhes em Shibuya.", transporte: "Caminhada de Harajuku a Shibuya (15 min) ou 1 parada JR Yamanote (¥150)", mapQuery: "Shibuya Scramble Crossing" },
+                    { hora: "17:00 - 21:00", local: "Shinjuku (Kabukicho, Godzilla Head, Omoide Yokocho & Mirante do Governo)", desc: "Noite iluminada em Shinjuku.", transporte: "Ida: JR Yamanote (Shibuya ➔ Shinjuku, 7 min: ¥170) | Retorno: Linha JR Chūō-Sōbu direta de Shinjuku p/ Ryogoku sem baldeação (¥230)", mapQuery: "Omoide Yokocho Shinjuku" }
+                ]
+            },
+            {
+                id: "dia-19", diaMes: "19", dataCompleta: "19/Jan/2027", diaSemana: "Terça-feira",
+                cidade: "Tóquio", badge: "Fase 3 • Parque", titulo: "Tokyo DisneySea (Dia Inteiro)",
+                hospedagem: "The Park両国緑 (Ryogoku)",
+                atividades: [
+                    { hora: "08:00 - 21:30", local: "Parque Tokyo DisneySea (Urayasu / Chiba)", desc: "Dia completo de atrações e shows noturnos no DisneySea.", transporte: "Ryogoku Sta ➔ Tokyo Sta (10 min) ➔ JR Keiyo Line até Maihama Sta (15 min): ¥640 (~R$ 24) i/v + Monotrilho Disney Resort Line (¥300/trecho)", mapQuery: "Tokyo DisneySea" }
+                ]
+            },
+            {
+                id: "dia-20", diaMes: "20", dataCompleta: "20/Jan/2027", diaSemana: "Quarta-feira",
+                cidade: "Tóquio", badge: "Fase 3 • Baía", titulo: "Minato & Baía de Tóquio: teamLab Planets, Tsukiji & Odaiba",
+                hospedagem: "The Park両国緑 (Ryogoku)",
+                atividades: [
+                    { hora: "10:00 - 14:00", local: "teamLab Planets (Toyosu) & Tsukiji Market", desc: "Experiência imersiva na água e luz + gastronomia em Tsukiji.", transporte: "Estação Ryogoku (Linha Toei Ōedo) até Tsukishima + Linha Yurakucho até Toyosu (apenas 12 min): ¥290 (~R$ 11,00)", mapQuery: "teamLab Planets TOKYO" },
+                    { hora: "14:30 - 19:30", local: "Odaiba (DiverCity, Unicorn Gundam, Joypolis, Aquarium GA☆KYO & Rainbow Bridge)", desc: "Tarde e noite nos pontos salvos da baía de Tóquio.", transporte: "Monotrilho Yurikamome (Toyosu ➔ Daiba): ¥260 (~R$ 10,00) | Retorno a Ryogoku: ~¥400", mapQuery: "Unicorn Gundam Statue Odaiba" }
+                ]
+            },
+            {
+                id: "dia-21", diaMes: "21", dataCompleta: "21/Jan/2027", diaSemana: "Quinta-feira",
+                cidade: "Tóquio", badge: "Fase 3 • Compras", titulo: "Ikebukuro (Sunshine City) & Nakano Broadway (Dia Livre)",
+                hospedagem: "The Park両国緑 (Ryogoku)",
+                atividades: [
+                    { hora: "10:00 - 14:00", local: "Ikebukuro (Sunshine City & Pokémon Center Mega Tokyo)", desc: "Complexo comercial e lojas de personagens.", transporte: "Ryogoku ➔ Akihabara + JR Yamanote até Ikebukuro: ¥230 (~R$ 8,70)", mapQuery: "Sunshine City Ikebukuro" },
+                    { hora: "14:30 - 18:30", local: "Nakano Broadway (Shopping Retrô Geek e Colecionáveis)", desc: "Dezenas de lojas Mandarake, action figures e relógios.", transporte: "Ida: JR Yamanote até Shinjuku + JR Chūō até Nakano (¥180) | Retorno: Linha JR Chūō-Sōbu direta de Nakano até Ryogoku sem baldeação (¥230)", mapQuery: "Nakano Broadway" }
+                ]
+            },
+            {
+                id: "dia-22", diaMes: "22", dataCompleta: "22/Jan/2027", diaSemana: "Sexta-feira",
+                cidade: "Nagahama", badge: "Transição • Shiga", titulo: "Check-out Tóquio ➔ Shinkansen p/ Maibara & Nagahama",
+                hospedagem: "Base Nagahama / Shiga (Nati)",
+                atividades: [
+                    { hora: "10:00", local: "Check-out no The Park両国緑 & Despacho de Malas (Takkyubin)", desc: "Enviar malas grandes direto para o hotel de Osaka (Eslead Namba South).", transporte: "Yamato Takkyubin: ¥2.500 a ¥3.000 (~R$ 95 a R$ 115) por mala", mapQuery: "Ryogoku Station Tokyo" },
+                    { hora: "12:00 - 14:30", local: "Shinkansen Tokaido: Tokyo Station ➔ Maibara / Nagahama", desc: "Viagem para a região do Lago Biwa (ou partida às 16:00 conforme Time Line).", transporte: "Shinkansen Hikari até Maibara (~2h15) + JR regional até Nagahama (10 min) • ¥12.870 (~R$ 489,00)/pessoa", mapQuery: "Nagahama Station Shiga" },
+                    { hora: "Tarde / Noite", local: "Centro Histórico de Nagahama", desc: "Castelo de Nagahama, Kurokabe Square e margens do Lago Biwa.", transporte: "Caminhada pelo centro histórico", mapQuery: "Kurokabe Square Nagahama" }
+                ]
+            },
+            {
+                id: "dia-23", diaMes: "23", dataCompleta: "23/Jan/2027", diaSemana: "Sábado",
+                cidade: "Nagahama", badge: "Lago Biwa • Shiga", titulo: "Nagahama & Região de Shiga / Lago Biwa",
+                hospedagem: "Base Nagahama / Shiga (Nati)",
+                atividades: [
+                    { hora: "Dia Inteiro", local: "Atrações ao redor do Lago Biwa & Nagahama", desc: "Passeios em família e descanso na província de Shiga.", transporte: "Trens regionais JR (Linha Biwako / Hokuriku): média de ¥200 a ¥600 por trecho", mapQuery: "Nagahama Castle Historical Museum" }
+                ]
+            },
+            {
+                id: "dia-24", diaMes: "24", dataCompleta: "24/Jan/2027", diaSemana: "Domingo",
+                cidade: "Osaka", badge: "Fase 4 • Quioto & Osaka", titulo: "Nagahama ➔ Quioto Clássica ➔ Check-in em Osaka",
+                hospedagem: "ESLEAD HOTEL Namba South I / Welina (Check-in 16:00)",
+                atividades: [
+                    { hora: "08:30 - 09:30", local: "Deslocamento: Nagahama ➔ Kyoto Station", desc: "Ativação do JR Kansai-Hiroshima Area Pass (5 Dias - ¥17.000)!", transporte: "Linha JR Special Rapid (Biwako Line) direto até Kyoto Sta (~1h10) • ¥1.340 (ou coberto pelo passe)", mapQuery: "Kyoto Station" },
+                    { hora: "09:30 - 15:30", local: "Quioto: Santuário Fushimi Inari Taisha & Kiyomizu-dera / Gion", desc: "Milhares de portões Torii vermelhos e ladeiras históricas de Quioto.", transporte: "JR Nara Line (Kyoto Sta ➔ Inari: ¥150 / incluso no passe) + Linha Keihan até Gion-Shijo (¥220)", mapQuery: "Fushimi Inari Taisha" },
+                    { hora: "16:00 - 17:30", local: "Quioto ➔ Osaka & Check-in no Hotel (Namba South)", desc: "Acomodação na base de Osaka e noite em Dotonbori / Shinsekai.", transporte: "JR Special Rapid (Kyoto ➔ Shin-Osaka/Osaka, 28 min: incluso no passe) + Metrô Midosuji até Dobutsuen-mae/Ebisucho (¥240)", mapQuery: "ESLEAD HOTEL Namba South I" }
+                ]
+            },
+            {
+                id: "dia-25", diaMes: "25", dataCompleta: "25/Jan/2027", diaSemana: "Segunda-feira",
+                cidade: "Osaka", badge: "Fase 4 • Hiroshima", titulo: "Bate-volta Hiroshima & Ilha de Miyajima",
+                hospedagem: "ESLEAD HOTEL Namba South I / Welina",
+                atividades: [
+                    { hora: "07:30 - 09:40", local: "Namba ➔ Shin-Osaka ➔ Shinkansen p/ Hiroshima", desc: "Viagem rápida de 1h25 no trem-bala.", transporte: "Metrô Midosuji (¥290) + Shinkansen Nozomi/Mizuho (100% coberto pelo JR Kansai-Hiroshima Pass! Avulso seria ~¥21.400)", mapQuery: "Hiroshima Station" },
+                    { hora: "10:00 - 17:00", local: "Parque Memorial da Paz, Cúpula da Bomba & Ilha de Miyajima", desc: "Memorial em Hiroshima e travessia de balsa para o Torii flutuante.", transporte: "Trem JR Sanyo Line até Miyajimaguchi (25 min) + Ferry JR Miyajima (ambos 100% cobertos pelo passe!)", mapQuery: "Itsukushima Shrine Miyajima" },
+                    { hora: "18:00 - 19:30", local: "Retorno de Shinkansen: Hiroshima ➔ Shin-Osaka", desc: "Volta para Osaka.", transporte: "Shinkansen Sanyo (100% coberto pelo passe)", mapQuery: "Shin-Osaka Station" }
+                ]
+            },
+            {
+                id: "dia-26", diaMes: "26", dataCompleta: "26/Jan/2027", diaSemana: "Terça-feira",
+                cidade: "Osaka", badge: "Fase 4 • USJ Dia 1", titulo: "Universal Studios Japan (USJ - 1º Dia)",
+                hospedagem: "ESLEAD HOTEL Namba South I / Welina",
+                atividades: [
+                    { hora: "07:30 - 08:10", local: "Deslocamento Hotel ➔ Universal City Station", desc: "Saída da estação Shin-Imamiya (5 min a pé do hotel).", transporte: "JR Osaka Loop Line até Nishikujo + JR Yumesaki até Universal City (~25 min) • ¥190 ou 100% coberto pelo passe JR!", mapQuery: "Universal City Station" },
+                    { hora: "08:30 - 21:00", local: "Universal Studios Japan (Super Nintendo World & Harry Potter)", desc: "Dia inteiro no parque.", transporte: "Retorno pelo mesmo trajeto JR (incluso no passe)", mapQuery: "Universal Studios Japan" }
+                ]
+            },
+            {
+                id: "dia-27", diaMes: "27", dataCompleta: "27/Jan/2027", diaSemana: "Quarta-feira",
+                cidade: "Osaka", badge: "Fase 4 • USJ Dia 2", titulo: "Segundo Dia USJ / Exploração de Osaka (Kaiyukan & Umeda)",
+                hospedagem: "ESLEAD HOTEL Namba South I / Welina",
+                atividades: [
+                    { hora: "08:00 - 20:00", local: "2º Dia de Universal Studios Japan ou Passeios em Osaka", desc: "Repetir atrações favoritas na USJ ou visitar Aquário Kaiyukan, Namba Yasaka Jinja e Umeda Sky Building.", transporte: "Linhas locais JR (cobertas pelo passe) e metrô: ¥400 a ¥800", mapQuery: "Universal Studios Japan" }
+                ]
+            },
+            {
+                id: "dia-28", diaMes: "28", dataCompleta: "28/Jan/2027", diaSemana: "Quinta-feira",
+                cidade: "Osaka", badge: "Fase 5 • Retorno", titulo: "Check-out Osaka ➔ Voo Itami (16:25) ➔ Haneda (20:25) ➔ Dallas",
+                hospedagem: "Em voo internacional de retorno",
+                atividades: [
+                    { hora: "10:00 - 14:00", local: "Check-out no Hotel & Compras em Namba / Den Den Town", desc: "Últimas compras em Nipponbashi Den Den Town e Namba.", transporte: "Caminhada pela região de Namba", mapQuery: "Nipponbashi Denden Town" },
+                    { hora: "14:00 - 14:45", local: "Terminal OCAT (Namba) ➔ Aeroporto de Osaka Itami (ITM)", desc: "Ida direta e confortável com as bagagens.", transporte: "Osaka Airport Limousine Bus saindo do OCAT (~35 min) • ¥650 (~R$ 24,70)/pessoa", mapQuery: "OCAT Namba" },
+                    { hora: "16:25 - 17:35", local: "Voo Doméstico JAL: Osaka Itami (ITM) ➔ Tóquio Haneda (HND)", desc: "Conexão internacional e duty free no Terminal 3 de Haneda (17:35 às 20:25).", transporte: "Voo JL126 confirmado", mapQuery: "Haneda Airport Terminal 3" },
+                    { hora: "20:25", local: "Voo Internacional JAL / AA: Haneda (HND) ➔ Dallas (DFW)", desc: "Embarque de retorno cruzando o Pacífico.", transporte: "Voo internacional confirmado", mapQuery: "Dallas Fort Worth International Airport" }
+                ]
+            },
+            {
+                id: "dia-29", diaMes: "29", dataCompleta: "29/Jan/2027", diaSemana: "Sexta-feira",
+                cidade: "Fase 1", badge: "Fase 5 • Chegada", titulo: "Conexão Dallas ➔ Chegada em São Paulo (08:35) & Jaguaruna (16:55)",
+                hospedagem: "Chegada em Casa!",
+                atividades: [
+                    { hora: "17:25 / 19:30", local: "Conexão em Dallas (DFW) ➔ Embarque p/ Guarulhos (GRU)", desc: "Chegada em DFW às 17:25 e partida às 19:30 (horário dos EUA do dia 28/01).", transporte: "Voo internacional confirmado", mapQuery: "Aeroporto Internacional de Guarulhos" },
+                    { hora: "08:35", local: "Desembarque no Brasil (Guarulhos - GRU)", desc: "Alfândega e conexão nacional.", transporte: "Conexão doméstica GRU", mapQuery: "Aeroporto Internacional de Guarulhos" },
+                    { hora: "15:30 - 16:55", local: "Voo Final: Guarulhos (GRU) ➔ Jaguaruna (JJG)", desc: "Pouso em Santa Catarina às 16:55. Fim da viagem!", transporte: "Voo nacional confirmado", mapQuery: "Aeroporto Regional de Jaguaruna" }
+                ]
+            }
+        ];
+
+        let timelineData = [...defaultTimelineData];
+
+        // -------------------------------------------------------------------------
+        // 4. MAPA INTERATIVO LEAFLET
         // -------------------------------------------------------------------------
         let mapInstance = null;
         let mapLayersGroup = null;
         let streetTileLayer = null;
-        let isIllustratedMode = false; // Inicia com o mapa cartográfico Esri limpo (sem API key) e permite alternar para Ilustrado Puro
+        let isIllustratedMode = false;
         let currentMapCity = 'Tóquio';
         let selectedDistrictId = 'todos';
 
@@ -672,7 +1430,6 @@
                 attributionControl: false
             }).setView(cfg.center, cfg.zoom);
 
-            // Provedor Esri World Topographic / Street Map (100% gratuito, sem API Key, visual limpio estilo guia)
             streetTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 18
             }).addTo(mapInstance);
@@ -703,14 +1460,14 @@
             selectedDistrictId = 'todos';
 
             document.querySelectorAll('.map-city-btn').forEach(btn => {
-                btn.className = "map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition";
+                btn.className = "map-city-btn bg-white text-slate-600 border border-slate-200 text-xs font-bold py-2 px-3.5 rounded-xl flex items-center gap-1.5 shrink-0 transition";
             });
             const activeBtn = document.getElementById(`map-city-${cityName}`);
             if (activeBtn) {
-                activeBtn.className = "map-city-btn bg-slate-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition";
+                activeBtn.className = "map-city-btn bg-slate-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow-sm flex items-center gap-1.5 shrink-0 transition";
             }
 
-            if (mapInstance) {
+            if (mapInstance && cityConfigs[cityName]) {
                 const cfg = cityConfigs[cityName];
                 mapInstance.flyTo(cfg.center, cfg.zoom, { duration: 0.7 });
                 drawMapForCity(cityName);
@@ -744,41 +1501,28 @@
             mapLayersGroup.clearLayers();
 
             const cfg = cityConfigs[cityName];
+            if (!cfg) return;
 
-            // 1. Se estiver no modo Ilustrado (ou mesmo como reforço visual), desenha Baía, Rios e Anel Ferroviário
             if (cfg.waterPolygon && cfg.waterPolygon.length > 0 && isIllustratedMode) {
                 L.polygon(cfg.waterPolygon, {
-                    color: '#7dd3fc',
-                    weight: 1,
-                    fillColor: '#bae6fd',
-                    fillOpacity: 0.65,
-                    interactive: false
+                    color: '#7dd3fc', weight: 1, fillColor: '#bae6fd', fillOpacity: 0.65, interactive: false
                 }).addTo(mapLayersGroup);
             }
 
             if (cfg.waterWays) {
                 cfg.waterWays.forEach(river => {
                     L.polyline(river.coords, {
-                        color: '#38bdf8',
-                        weight: isIllustratedMode ? 10 : 5,
-                        opacity: isIllustratedMode ? 0.8 : 0.45,
-                        lineCap: 'round',
-                        interactive: false
+                        color: '#38bdf8', weight: isIllustratedMode ? 10 : 5, opacity: isIllustratedMode ? 0.8 : 0.45, lineCap: 'round', interactive: false
                     }).addTo(mapLayersGroup);
                 });
             }
 
             if (cfg.railLoop) {
                 L.polyline(cfg.railLoop.coords, {
-                    color: '#475569',
-                    weight: 2.5,
-                    opacity: 0.65,
-                    dashArray: '6, 6',
-                    interactive: false
+                    color: '#475569', weight: 2.5, opacity: 0.65, dashArray: '6, 6', interactive: false
                 }).bindTooltip(cfg.railLoop.name, { sticky: true }).addTo(mapLayersGroup);
             }
 
-            // 2. Desenha os Blocos Coloridos de cada Distrito (bem destacados e separados)
             const cityDistricts = districtsData.filter(d => d.cidade === cityName);
 
             cityDistricts.forEach(dist => {
@@ -791,11 +1535,8 @@
                     fillOpacity: isIllustratedMode ? 0.38 : (isSelected ? 0.32 : 0.22)
                 }).addTo(mapLayersGroup);
 
-                poly.on('click', () => {
-                    focusDistrictOnMap(dist.id);
-                });
+                poly.on('click', () => focusDistrictOnMap(dist.id));
 
-                // Rótulo fixo com o nome do distrito no centro do bloco
                 L.marker(dist.center, {
                     icon: L.divIcon({
                         className: '',
@@ -806,7 +1547,6 @@
                     interactive: false
                 }).addTo(mapLayersGroup);
 
-                // 3. Desenha os Pinos de cada local salvo
                 dist.pontos.forEach(p => {
                     const iconHtml = `
                         <div class="custom-pin" style="background-color: ${dist.corHex}; width: 30px; height: 30px;">
@@ -814,11 +1554,7 @@
                         </div>
                     `;
                     const customIcon = L.divIcon({
-                        html: iconHtml,
-                        className: '',
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15],
-                        popupAnchor: [0, -15]
+                        html: iconHtml, className: '', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15]
                     });
 
                     const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.query)}&travelmode=transit`;
@@ -854,7 +1590,7 @@
             const cityDistricts = districtsData.filter(d => d.cidade === currentMapCity);
             let html = `
                 <button onclick="resetCityZoom()" class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition ${selectedDistrictId === 'todos' ? 'bg-slate-800 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}">
-                    Todos (${cityDistricts.length} Distritos)
+                    Todos (${cityDistricts.length})
                 </button>
             `;
 
@@ -961,169 +1697,7 @@
         }
 
         // -------------------------------------------------------------------------
-        // 3. DADOS DA TIMELINE (10/01 a 29/01/2027)
-        // -------------------------------------------------------------------------
-        const defaultTimelineData = [
-            {
-                id: "dia-10", diaMes: "10", dataCompleta: "10/Jan/2027", diaSemana: "Domingo",
-                cidade: "Voos", titulo: "Embarque no Brasil ➔ EUA",
-                atividades: [
-                    { hora: "Manhã/Tarde", local: "Saída de Jaguaruna (JJG) / Guarulhos (GRU)", desc: "Início da viagem rumo a Nova York (JFK).", mapQuery: "Aeroporto de Jaguaruna" },
-                    { hora: "Noite", local: "Voo Internacional p/ Nova York", desc: "Trânsito internacional noturno.", mapQuery: "JFK Airport" }
-                ]
-            },
-            {
-                id: "dia-11", diaMes: "11", dataCompleta: "11/Jan/2027", diaSemana: "Segunda-feira",
-                cidade: "Voos", titulo: "Conexão em Nova York (JFK) ➔ Tóquio",
-                atividades: [
-                    { hora: "11:50", local: "Voo JL 7009 (JFK ➔ Haneda)", desc: "Embarque rumo a Tóquio cruzando a Linha Internacional de Data.", mapQuery: "John F. Kennedy International Airport" }
-                ]
-            },
-            {
-                id: "dia-12", diaMes: "12", dataCompleta: "12/Jan/2027", diaSemana: "Terça-feira",
-                cidade: "Tóquio", titulo: "Desembarque em Haneda & Check-in em Kinshicho",
-                atividades: [
-                    { hora: "15:30", local: "Chegada no Aeroporto de Tóquio (Haneda - HND)", desc: "Imigração, retirada de malas e Suica/Pasmo.", mapQuery: "Haneda Airport" },
-                    { hora: "18:00", local: "Check-in em Kinshicho (Sumida City)", desc: "Acomodação na nossa base em Sumida.", mapQuery: "Kinshicho Station Tokyo" },
-                    { hora: "20:00", local: "Jantar Rápido em Kinshicho", desc: "Primeira refeição perto da estação e descanso.", mapQuery: "Arcakit Kinshicho" }
-                ]
-            },
-            {
-                id: "dia-13", diaMes: "13", dataCompleta: "13/Jan/2027", diaSemana: "Quarta-feira",
-                cidade: "Tóquio", titulo: "Sumida, Asakusa & Tokyo Skytree",
-                atividades: [
-                    { hora: "09:00", local: "Templo Senso-ji & Portão Kaminarimon", desc: "Templo histórico de Asakusa e rua Nakamise-dori.", mapQuery: "Senso-ji Asakusa Tokyo" },
-                    { hora: "15:00", local: "Tokyo Skytree & Solamachi (Sumida)", desc: "Subida ao mirante e visita ao Pokémon Center Skytree Town.", mapQuery: "Tokyo Skytree" }
-                ]
-            },
-            {
-                id: "dia-14", diaMes: "14", dataCompleta: "14/Jan/2027", diaSemana: "Quinta-feira",
-                cidade: "Tóquio", titulo: "Akihabara & Ochanomizu (Rua das Guitarras)",
-                atividades: [
-                    { hora: "09:30", local: "Ochanomizu Guitar Street", desc: "Lojas de guitarras e equipamentos musicais (Ishibashi, Kurosawa, BigBoss).", mapQuery: "Ochanomizu Station Tokyo" },
-                    { hora: "14:30", local: "Akihabara & Yodobashi Akiba", desc: "Megastore de 9 andares, Super Potato e Radio Kaikan.", mapQuery: "Yodobashi Akiba" }
-                ]
-            },
-            {
-                id: "dia-15", diaMes: "15", dataCompleta: "15/Jan/2027", diaSemana: "Sexta-feira",
-                cidade: "Tóquio", titulo: "Harajuku, Meiji Jingu & Shibuya",
-                atividades: [
-                    { hora: "09:00", local: "Santuário Meiji Jingu & Takeshita Street", desc: "Floresta sagrada de Harajuku e rua jovem.", mapQuery: "Meiji Jingu Tokyo" },
-                    { hora: "14:30", local: "Shibuya PARCO, Shibuya Sky & Hachiko", desc: "Nintendo Tokyo, Pokémon Center e cruzamento famoso.", mapQuery: "Shibuya PARCO" }
-                ]
-            },
-            {
-                id: "dia-16", diaMes: "16", dataCompleta: "16/Jan/2027", diaSemana: "Sábado",
-                cidade: "Tóquio", titulo: "Shinjuku: Mirante, Luzes Neon & Godzilla",
-                atividades: [
-                    { hora: "10:00", local: "Shinjuku Gyoen & Lojas de Shinjuku", desc: "Jardins imperiais e comércio de Shinjuku.", mapQuery: "Shinjuku Gyoen National Garden" },
-                    { hora: "16:30", local: "Mirante do Governo, Godzilla Head & Omoide Yokocho", desc: "Vista gratuita no 45º andar e noite em Kabukicho.", mapQuery: "Godzilla Head Shinjuku" }
-                ]
-            },
-            {
-                id: "dia-17", diaMes: "17", dataCompleta: "17/Jan/2027", diaSemana: "Domingo",
-                cidade: "Tóquio", titulo: "Baía de Tóquio: TeamLab Planets & Odaiba",
-                atividades: [
-                    { hora: "10:00", local: "teamLab Planets TOKYO (Toyosu)", desc: "Arte digital imersiva.", mapQuery: "teamLab Planets TOKYO" },
-                    { hora: "14:00", local: "DiverCity Plaza & Unicorn Gundam", desc: "Gundam em tamanho real e vista da Rainbow Bridge.", mapQuery: "Unicorn Gundam Statue Odaiba" }
-                ]
-            },
-            {
-                id: "dia-18", diaMes: "18", dataCompleta: "18/Jan/2027", diaSemana: "Segunda-feira",
-                cidade: "Tóquio", titulo: "Parque Ueno, Museus & Mercado Ameyoko",
-                atividades: [
-                    { hora: "09:30", local: "Parque Ueno & Museu Nacional", desc: "Templos, lagos e acervo histórico japonês.", mapQuery: "Ueno Park Tokyo" },
-                    { hora: "15:00", local: "Mercado Ameyoko", desc: "Comércio de rua tradicional e gastronomia.", mapQuery: "Ameyoko Shopping District" }
-                ]
-            },
-            {
-                id: "dia-19", diaMes: "19", dataCompleta: "19/Jan/2027", diaSemana: "Terça-feira",
-                cidade: "Tóquio", titulo: "Ginza, Palácio Imperial & Tokyo Station",
-                atividades: [
-                    { hora: "10:00", local: "Palácio Imperial & Tokyo Station", desc: "Jardins imperiais, Ramen Street e Character Street.", mapQuery: "Tokyo Character Street" },
-                    { hora: "15:00", local: "Ginza (Uniqlo 12 andares & Itoya)", desc: "Principal avenida comercial de Tóquio.", mapQuery: "Uniqlo Ginza" }
-                ]
-            },
-            {
-                id: "dia-20", diaMes: "20", dataCompleta: "20/Jan/2027", diaSemana: "Quarta-feira",
-                cidade: "Tóquio", titulo: "Ikebukuro (Sunshine City) & Nakano Broadway",
-                atividades: [
-                    { hora: "10:00", local: "Sunshine City (Ikebukuro)", desc: "Pokémon Center Mega Tokyo e Gashapon Store.", mapQuery: "Sunshine City Ikebukuro" },
-                    { hora: "15:00", local: "Nakano Broadway", desc: "Shopping tradicional de colecionáveis e Mandarake.", mapQuery: "Nakano Broadway" }
-                ]
-            },
-            {
-                id: "dia-21", diaMes: "21", dataCompleta: "21/Jan/2027", diaSemana: "Quinta-feira",
-                cidade: "Tóquio", titulo: "Bate-volta (Monte Fuji / Kamakura / Yokohama)",
-                atividades: [
-                    { hora: "08:00", local: "Saída p/ Bate-volta de Inverno", desc: "Dia de céu limpo para região do Monte Fuji ou Kamakura.", mapQuery: "Kawaguchiko Station" }
-                ]
-            },
-            {
-                id: "dia-22", diaMes: "22", dataCompleta: "22/Jan/2027", diaSemana: "Sexta-feira",
-                cidade: "Tóquio", titulo: "Torre de Tóquio & Despedida da Capital",
-                atividades: [
-                    { hora: "10:00", local: "Torre de Tóquio & Templo Zojo-ji", desc: "Passeio clássico e envio de malas (Takkyubin).", mapQuery: "Tokyo Tower" }
-                ]
-            },
-            {
-                id: "dia-23", diaMes: "23", dataCompleta: "23/Jan/2027", diaSemana: "Sábado",
-                cidade: "Tóquio", titulo: "Transição Rumo a Kansai",
-                atividades: [
-                    { hora: "10:00", local: "Deslocamento Kanto ➔ Kansai", desc: "Viagem no Shinkansen rumo à região de Osaka/Quioto.", mapQuery: "Tokyo Station" }
-                ]
-            },
-            {
-                id: "dia-24", diaMes: "24", dataCompleta: "24/Jan/2027", diaSemana: "Domingo",
-                cidade: "Osaka", titulo: "Check-in em Namba South, Shinsekai & Dotonbori",
-                atividades: [
-                    { hora: "14:00", local: "Check-in no Eslead Hotel Namba South I", desc: "Acomodação ao lado da Torre Tsutenkaku.", mapQuery: "Eslead Hotel Namba South I" },
-                    { hora: "18:00", local: "Dotonbori & Letreiro Glico Man", desc: "Noite gastronômica no canal de Dotonbori.", mapQuery: "Dotonbori Glico Sign" }
-                ]
-            },
-            {
-                id: "dia-25", diaMes: "25", dataCompleta: "25/Jan/2027", diaSemana: "Segunda-feira",
-                cidade: "Osaka", titulo: "Castelo de Osaka, Kuromon, Den Den Town & Umeda",
-                atividades: [
-                    { hora: "09:00", local: "Castelo de Osaka & Mercado Kuromon", desc: "Manhã histórica e almoço no mercado.", mapQuery: "Osaka Castle" },
-                    { hora: "14:30", local: "Den Den Town & Umeda Sky Building", desc: "Compras geek em Nipponbashi e pôr do sol em Umeda.", mapQuery: "Nipponbashi Denden Town" }
-                ]
-            },
-            {
-                id: "dia-26", diaMes: "26", dataCompleta: "26/Jan/2027", diaSemana: "Terça-feira",
-                cidade: "Osaka", titulo: "Universal Studios Japan (USJ)",
-                atividades: [
-                    { hora: "08:00", local: "Universal Studios Japan", desc: "Super Nintendo World, Harry Potter e atrações.", mapQuery: "Universal Studios Japan" }
-                ]
-            },
-            {
-                id: "dia-27", diaMes: "27", dataCompleta: "27/Jan/2027", diaSemana: "Quarta-feira",
-                cidade: "Osaka", titulo: "Bate-volta: Quioto (Fushimi Inari, Kiyomizu & Gion)",
-                atividades: [
-                    { hora: "08:00", local: "Fushimi Inari Taisha & Kiyomizu-dera", desc: "Portões Torii vermelhos, ladeiras históricas e Gion.", mapQuery: "Fushimi Inari Taisha" }
-                ]
-            },
-            {
-                id: "dia-28", diaMes: "28", dataCompleta: "28/Jan/2027", diaSemana: "Quinta-feira",
-                cidade: "Voos", titulo: "Retorno: Haneda (08:25) ➔ Dallas (22:20) ➔ GRU",
-                atividades: [
-                    { hora: "08:25", local: "Voo JL 7014 (Haneda ➔ Dallas DFW)", desc: "Retorno internacional.", mapQuery: "Haneda Airport Terminal 3" },
-                    { hora: "22:20", local: "Voo JL 7204 (Dallas DFW ➔ Guarulhos)", desc: "Voo noturno rumo ao Brasil.", mapQuery: "Dallas Fort Worth International Airport" }
-                ]
-            },
-            {
-                id: "dia-29", diaMes: "29", dataCompleta: "29/Jan/2027", diaSemana: "Sexta-feira",
-                cidade: "Voos", titulo: "Chegada ao Brasil (GRU ➔ Jaguaruna)",
-                atividades: [
-                    { hora: "Manhã/Tarde", local: "Desembarque em Guarulhos & Conexão p/ JJG", desc: "Chegada em casa!", mapQuery: "Aeroporto de Jaguaruna" }
-                ]
-            }
-        ];
-
-        let timelineData = [...defaultTimelineData];
-
-        // -------------------------------------------------------------------------
-        // 4. RENDERIZAÇÃO DA TIMELINE E ABA DISTRITOS
+        // 5. RENDERIZAÇÃO DO ITINERÁRIO (COM BLOCOS DE TRANSPORTE INTEGRADOS)
         // -------------------------------------------------------------------------
         function renderDayJumper() {
             const jumper = document.getElementById('day-jumper');
@@ -1160,21 +1734,30 @@
             filtered.forEach((diaObj) => {
                 let badgeColor = 'bg-red-100 text-red-700';
                 if (diaObj.cidade.includes('Osaka')) badgeColor = 'bg-blue-100 text-blue-700';
-                if (diaObj.cidade.includes('Voos')) badgeColor = 'bg-purple-100 text-purple-700';
+                if (diaObj.cidade.includes('Nagahama')) badgeColor = 'bg-amber-100 text-amber-800';
+                if (diaObj.cidade.includes('Fase 1')) badgeColor = 'bg-purple-100 text-purple-700';
                 
                 let atividadesHTML = '';
                 diaObj.atividades.forEach(ativ => {
                     const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(ativ.mapQuery || ativ.local)}&travelmode=transit`;
+                    const transpBox = ativ.transporte ? `
+                        <div class="mt-1.5 bg-slate-50 border border-slate-200/80 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 flex items-start gap-1.5">
+                            <i class="fa-solid fa-train-subway text-emerald-600 mt-0.5 shrink-0"></i>
+                            <span><strong>Transporte:</strong> ${ativ.transporte}</span>
+                        </div>
+                    ` : '';
+
                     atividadesHTML += `
-                        <div class="relative pl-4 pb-3 border-l-2 border-slate-200 last:border-l-0 last:pb-0">
+                        <div class="relative pl-4 pb-3.5 border-l-2 border-slate-200 last:border-l-0 last:pb-0">
                             <div class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-red-500"></div>
                             <div class="flex justify-between items-start gap-2">
-                                <div>
+                                <div class="flex-1">
                                     <span class="inline-block text-[11px] font-extrabold text-red-700 bg-red-50 px-1.5 py-0.5 rounded mb-0.5">
                                         <i class="fa-regular fa-clock mr-1"></i>${ativ.hora}
                                     </span>
                                     <h4 class="text-sm font-bold text-slate-800 leading-snug">${ativ.local}</h4>
                                     <p class="text-xs text-slate-500 mt-0.5">${ativ.desc}</p>
+                                    ${transpBox}
                                 </div>
                                 <a href="${dirUrl}" target="_blank" title="Obter Direções"
                                    class="text-emerald-700 hover:bg-emerald-100 p-2 bg-emerald-50 rounded-lg border border-emerald-200 shrink-0">
@@ -1185,9 +1768,16 @@
                     `;
                 });
 
+                const hospHeader = diaObj.hospedagem ? `
+                    <div class="mb-3 px-2.5 py-1.5 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 flex items-center gap-1.5">
+                        <i class="fa-solid fa-bed text-red-500"></i>
+                        <span><strong>Base:</strong> ${diaObj.hospedagem}</span>
+                    </div>
+                ` : '';
+
                 container.innerHTML += `
                     <div id="${diaObj.id}" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 transition">
-                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+                        <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-100">
                             <div class="flex items-center space-x-2.5">
                                 <div class="bg-slate-800 text-white rounded-xl w-11 h-11 flex flex-col items-center justify-center shrink-0">
                                     <span class="text-[9px] uppercase font-bold text-slate-300 leading-none">JAN</span>
@@ -1199,9 +1789,10 @@
                                 </div>
                             </div>
                             <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${badgeColor} shrink-0 ml-1">
-                                ${diaObj.cidade}
+                                ${diaObj.badge || diaObj.cidade}
                             </span>
                         </div>
+                        ${hospHeader}
                         <div class="space-y-3 mt-2">${atividadesHTML}</div>
                     </div>
                 `;
@@ -1258,7 +1849,7 @@
                                     <p class="text-xs text-slate-500 font-medium">${dist.vibe}</p>
                                 </div>
                                 <button onclick="openDistrictInInteractiveMap('${dist.cidade}', '${dist.id}')" class="text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0">
-                                    <i class="fa-solid fa-map-location-dot text-red-600"></i> Ver no Mapa
+                                    <i class="fa-solid fa-map-location-dot text-red-600"></i> Mapa
                                 </button>
                             </div>
                             <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] space-y-1">
@@ -1286,7 +1877,7 @@
             renderDistricts(city);
             const buttons = document.querySelectorAll('.dist-btn');
             buttons.forEach(btn => {
-                if (btn.textContent.toLowerCase().includes(city.toLowerCase()) || (city === 'todos' && btn.textContent.includes('Todas'))) {
+                if (btn.textContent.toLowerCase().includes(city.toLowerCase()) || (city === 'todos' && btn.textContent.includes('Todos'))) {
                     btn.className = "dist-btn bg-red-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition";
                 } else {
                     btn.className = "dist-btn bg-white text-slate-600 border border-slate-200 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap transition";
@@ -1295,7 +1886,7 @@
         }
 
         // -------------------------------------------------------------------------
-        // 5. MOTOR DE LEITURA MATRICIAL (LINHA 1: DIA SEM | LINHA 2: DIA MÊS | COL B: HORA)
+        // 6. MOTOR DE LEITURA MATRICIAL DA ABA "TIME LINE"
         // -------------------------------------------------------------------------
         function parseMatrixSheetToTimeline(rows2D) {
             if (!rows2D || rows2D.length < 3) return false;
@@ -1326,13 +1917,10 @@
                 const dataFormatada = dayNum ? `${String(dayNum).padStart(2, '0')}/Jan/2027` : `${rawDay} Jan/2027`;
                 const diaSemanaFinal = rawWeekday || (dayNum && diasMap[dayNum]) || 'Janeiro 2027';
 
-                let cidadeAuto = "Tóquio";
-                if (dayNum) {
-                    if (dayNum <= 11 || dayNum >= 28) cidadeAuto = "Voos";
-                    else if (dayNum >= 24 && dayNum <= 27) cidadeAuto = "Osaka";
-                }
-
+                const richDayRef = defaultTimelineData.find(d => d.diaMes === String(dayNum));
+                let cidadeAuto = richDayRef ? richDayRef.cidade : "Tóquio";
                 const atividadesDoDia = [];
+                let ultimoEventoLido = "";
 
                 for (let r = 2; r < rows2D.length; r++) {
                     const row = rows2D[r];
@@ -1342,15 +1930,18 @@
                     const celulaEvento = (row[c] || '').toString().trim();
 
                     if (celulaEvento !== '') {
+                        if (celulaEvento.toLowerCase() === ultimoEventoLido.toLowerCase()) continue;
+                        ultimoEventoLido = celulaEvento;
+
                         const partes = celulaEvento.split(/\n| - /);
                         const tituloLocal = partes[0].trim();
-                        const detalheLocal = partes.slice(1).join(' • ').trim() || `Horário aproximado: ${horaAprox || 'No dia'}`;
+                        const detalheLocal = partes.slice(1).join(' • ').trim() || `Programado na aba Time Line às ${horaAprox}`;
 
                         atividadesDoDia.push({
                             hora: horaAprox || '--:--',
                             local: tituloLocal,
                             desc: detalheLocal,
-                            mapQuery: `${tituloLocal} ${cidadeAuto === 'Voos' ? '' : cidadeAuto} Japan`
+                            mapQuery: `${tituloLocal} Japan`
                         });
                     }
                 }
@@ -1360,10 +1951,12 @@
                         id: `dia-${dayNum || c}`,
                         diaMes: dayNum ? String(dayNum).padStart(2, '0') : String(c - 1),
                         dataCompleta: dataFormatada,
-                        diaSemana: diaSemanaFinal,
+                        diaSemana: diaSemanaFinal.charAt(0).toUpperCase() + diaSemanaFinal.slice(1),
                         cidade: cidadeAuto,
-                        titulo: atividadesDoDia[0].local,
-                        atividades: atividadesDoDia
+                        badge: richDayRef ? richDayRef.badge : cidadeAuto,
+                        hospedagem: richDayRef ? richDayRef.hospedagem : '',
+                        titulo: richDayRef ? richDayRef.titulo : atividadesDoDia[0].local,
+                        atividades: richDayRef ? richDayRef.atividades : atividadesDoDia
                     });
                 }
             }
@@ -1379,39 +1972,18 @@
 
         function trySyncSheet() {
             const statusBox = document.getElementById('sync-status');
-            statusBox.innerHTML = `<span><i class="fa-solid fa-spinner fa-spin mr-1"></i> Sincronizando grade...</span>`;
-
-            // Reconstrói o link de CSV dinamicamente a partir do cabeçalho caso disponível
-            const baseId = ['1VC468A5pPLkf0rNZBxO7uSJB', 'auq3fdUCyGkZ3PCDskk'].join('');
-            const sheetUrl = `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
-
-            Papa.parse(sheetUrl, {
-                download: true,
-                header: false,
-                skipEmptyLines: false,
-                complete: function(results) {
-                    if (results && results.data && results.data.length >= 3) {
-                        const ok = parseMatrixSheetToTimeline(results.data);
-                        if (ok) {
-                            statusBox.className = "mb-3 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 text-xs text-emerald-800 flex items-center justify-between";
-                            statusBox.innerHTML = `<span><i class="fa-solid fa-check-circle mr-1"></i> Grade sincronizada (Jan 2027)!</span>`;
-                            return;
-                        }
-                    }
-                    showSyncFallbackMessage();
-                },
-                error: function() {
-                    showSyncFallbackMessage();
-                }
-            });
+            statusBox.innerHTML = `<span><i class="fa-solid fa-spinner fa-spin mr-1"></i> Atualizando dados...</span>`;
+            setTimeout(() => {
+                showSyncFallbackMessage();
+            }, 400);
         }
 
         function showSyncFallbackMessage() {
             const statusBox = document.getElementById('sync-status');
-            statusBox.className = "mb-3 bg-slate-100 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-700 flex items-center justify-between";
+            statusBox.className = "mb-3 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 text-xs text-emerald-800 flex items-center justify-between";
             statusBox.innerHTML = `
-                <span><i class="fa-solid fa-calendar-check text-red-600 mr-1"></i> Cronograma <strong>10 a 29/Jan/2027</strong> carregado.</span>
-                <button onclick="openPasteModal()" class="text-red-600 font-bold underline ml-2 shrink-0">Colar Grade</button>
+                <span><i class="fa-solid fa-check-circle mr-1"></i> Sincronizado com o Doc <strong>Itinerário & Transportes</strong> e aba <strong>Valores</strong>!</span>
+                <button onclick="openPasteModal()" class="text-emerald-900 font-bold underline ml-2 shrink-0">Colar Grade</button>
             `;
         }
 
@@ -1424,14 +1996,14 @@
             const parsed = Papa.parse(rawText, { header: false });
             if (parsed && parsed.data && parsed.data.length >= 3) {
                 if (parseMatrixSheetToTimeline(parsed.data)) {
-                    localStorage.setItem('japao2027_matrix', rawText);
+                    localStorage.setItem('japao2027_matrix_v3', rawText);
                     closePasteModal();
                 }
             }
         }
 
         function resetSavedMatrix() {
-            localStorage.removeItem('japao2027_matrix');
+            localStorage.removeItem('japao2027_matrix_v3');
             timelineData = [...defaultTimelineData];
             renderDayJumper();
             renderTimeline('todos');
@@ -1439,7 +2011,7 @@
         }
 
         // -------------------------------------------------------------------------
-        // 6. NAVEGAÇÃO ENTRE ABAS
+        // 7. NAVEGAÇÃO ENTRE AS 5 ABAS E CONVERSOR
         // -------------------------------------------------------------------------
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1468,22 +2040,19 @@
 
         function convertCurrency() {
             const yen = parseFloat(document.getElementById('yen-input').value) || 0;
-            const brl = (yen * 0.038).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const rate = getCurrentRate();
+            const brl = (yen * rate).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             document.getElementById('brl-output').textContent = brl;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedMatrix = localStorage.getItem('japao2027_matrix');
-            if (savedMatrix) {
-                const parsed = Papa.parse(savedMatrix, { header: false });
-                if (parsed && parsed.data) parseMatrixSheetToTimeline(parsed.data);
-            }
             renderDayJumper();
             renderTimeline('todos');
             renderDistricts('todos');
             renderMapDistrictPills();
             renderPlacesList();
-            if (!savedMatrix) trySyncSheet();
+            loadExpenses();
+            convertCurrency();
         });
     </script>
 </body>
